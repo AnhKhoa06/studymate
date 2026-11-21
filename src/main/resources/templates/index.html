@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Trang chủ - StudyMate</title>
+</head>
+<body>
+<h1>StudyMate</h1>
+
+<!-- Hiển thị tên và role bằng th:text, không đưa dữ liệu thô chưa escape ra view -->
+<p>Xin chào, <span th:text="${email}"></span></p>
+<p>Vai trò: <span th:text="${role}"></span></p>
+
+<form th:action="@{/logout}" method="post">
+    <button type="submit">Đăng xuất</button>
+</form>
+</body>
+</html>
