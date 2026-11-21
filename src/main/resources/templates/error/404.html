@@ -1,12 +1,13 @@
 <!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <title>Không tìm thấy trang - StudyMate</title>
-</head>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/auth :: layout('Không tìm thấy trang', ~{::content})}">
 <body>
-<h1>404 - Không tìm thấy trang</h1>
-<p>Trang bạn tìm không tồn tại.</p>
-<p><a href="/">Về trang chủ</a></p>
+<div th:fragment="content" class="auth-card" style="text-align: center;">
+    <h1 class="auth-card__title">404 - Không tìm thấy trang</h1>
+    <p style="color: var(--text-muted); margin: var(--space-3) 0;">Đường dẫn không tồn tại hoặc đã bị xóa.</p>
+    <div>
+        <a th:href="@{/}" class="btn btn--primary">Về trang chủ</a>
+    </div>
+</div>
 </body>
 </html>

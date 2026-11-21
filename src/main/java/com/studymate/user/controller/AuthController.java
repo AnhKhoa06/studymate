@@ -1,5 +1,7 @@
 package com.studymate.user.controller;
 
+import com.studymate.common.security.CurrentUserView;
+import com.studymate.common.security.SecurityUtils;
 import com.studymate.user.dto.RegisterRequest;
 import com.studymate.user.service.UserService;
 import com.studymate.user.service.UserService.EmailAlreadyExistsException;
@@ -7,8 +9,6 @@ import com.studymate.user.service.UserService.PasswordMismatchException;
 import com.studymate.user.service.UserService.PasswordTooLongException;
 import jakarta.validation.Valid;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -67,14 +67,12 @@ public class AuthController {
     }
 
     @GetMapping("/")
-    public String home(Model model, @AuthenticationPrincipal UserDetails userDetails) {
-        model.addAttribute("email", userDetails.getUsername());
-        // Lay role tu authority dang "ROLE_STUDENT" -> hien thi "STUDENT"
-        String role = userDetails.getAuthorities().stream()
-                .findFirst()
-                .map(a -> a.getAuthority().replace("ROLE_", ""))
-                .orElse("UNKNOWN");
-        model.addAttribute("role", role);
+    public String home(Model model) {
+        CurrentUserView currentUser = SecurityUtils.getCurrentUserView().orElse(null);
+        if (currentUser != null) {
+            model.addAttribute("fullName", currentUser.fullName());
+            model.addAttribute("role", currentUser.role());
+        }
         return "index";
     }
 }

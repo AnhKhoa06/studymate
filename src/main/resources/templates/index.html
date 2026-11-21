@@ -1,18 +1,20 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Trang chủ - StudyMate</title>
-</head>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/student :: layout('Trang chủ', ~{::content})}">
 <body>
-<h1>StudyMate</h1>
+<div th:fragment="content">
+    <h1 class="page-title">Trang chủ StudyMate</h1>
 
-<!-- Hiển thị tên và role bằng th:text, không đưa dữ liệu thô chưa escape ra view -->
-<p>Xin chào, <span th:text="${email}"></span></p>
-<p>Vai trò: <span th:text="${role}"></span></p>
+    <div class="card">
+        <p>Xin chào, <strong th:text="${fullName}"></strong></p>
+        <p>Vai trò: <span th:text="${role}"></span></p>
+    </div>
 
-<form th:action="@{/logout}" method="post">
-    <button type="submit">Đăng xuất</button>
-</form>
+    <div style="margin-top: var(--space-4);">
+        <form th:action="@{/logout}" method="post">
+            <button type="submit" class="btn btn--secondary">Đăng xuất</button>
+        </form>
+    </div>
+</div>
 </body>
 </html>

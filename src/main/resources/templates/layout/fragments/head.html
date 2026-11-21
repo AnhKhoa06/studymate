@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
+    <meta name="theme-color" content="#EEF6F7">
+    <title th:text="${title != null ? title + ' - StudyMate' : 'StudyMate'}">StudyMate</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Noto+Sans:wght@400;600&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" th:href="@{/css/tokens.css}">
+    <link rel="stylesheet" th:href="@{/css/base.css}">
+
+    <script>
+        (function () {
+            "use strict";
+            var STORAGE_KEY = "studymate-theme";
+            var stored, resolved;
+            try {
+                stored = localStorage.getItem(STORAGE_KEY);
+            } catch (e) {}
+
+            if (stored === "dark") {
+                resolved = "dark";
+            } else if (stored === "system") {
+                resolved = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+            } else {
+                resolved = "light";
+            }
+
+            document.documentElement.setAttribute("data-theme", resolved);
+            var meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) {
+                meta.setAttribute("content", resolved === "dark" ? "#0E1B20" : "#EEF6F7");
+            }
+        })();
+    </script>
+</head>
+<body></body>
+</html>

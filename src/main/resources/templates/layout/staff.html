@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" th:fragment="layout(title, content)">
+<head th:replace="~{layout/fragments/head :: head(${title})}"></head>
+<body class="layout-staff">
+    <aside th:replace="~{layout/fragments/navbar :: staffSidebar}"></aside>
+    <main class="layout-staff__main">
+        <th:block th:replace="${content}"></th:block>
+    </main>
+    <script th:src="@{/js/theme.js}"></script>
+</body>
+</html>

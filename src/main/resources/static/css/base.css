@@ -1,0 +1,620 @@
+/* base.css - Style co ban va khung layout theo docs/DESIGN.md */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: var(--leading-base);
+  color: var(--text);
+  background-color: var(--bg);
+  min-height: 100vh;
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color var(--duration-fast) var(--easing-std);
+}
+
+a:hover {
+  color: var(--primary-hover);
+}
+
+/* Focus style */
+:focus-visible {
+  outline: var(--border-width-thick) solid var(--border-focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ============================================================
+   KHUNG SINH VIEN (layout-student)
+   ============================================================ */
+.layout-student {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.layout-student__main {
+  flex: 1;
+  width: 100%;
+  max-width: var(--content-max-student);
+  margin-inline: auto;
+  padding: var(--space-4);
+  padding-bottom: calc(var(--nav-bottom-height) + var(--space-4));
+}
+
+@media (min-width: 768px) {
+  .layout-student__main {
+    padding: var(--space-6) var(--space-4);
+    padding-bottom: var(--space-8);
+  }
+}
+
+.layout-student .page-title {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+  color: var(--text);
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-3);
+  border-bottom: 3px double var(--border-light);
+}
+
+@media (min-width: 768px) {
+  .layout-student .page-title {
+    font-size: var(--text-2xl);
+    margin-bottom: var(--space-6);
+  }
+}
+
+/* ============================================================
+   KHUNG QUAN LY (layout-staff)
+   ============================================================ */
+.layout-staff {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+@media (min-width: 768px) {
+  .layout-staff {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+}
+
+.sidebar {
+  background: var(--surface);
+  border-right: var(--border-width) solid var(--border-light);
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-4);
+  gap: var(--space-4);
+}
+
+.sidebar__brand {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+  color: var(--primary);
+  text-decoration: none;
+  padding-bottom: var(--space-3);
+  border-bottom: var(--border-width) solid var(--border-light);
+}
+
+.sidebar__menu {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  flex: 1;
+}
+
+.sidebar__link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  color: var(--text);
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  transition: background var(--duration-fast) var(--easing-std);
+}
+
+.sidebar__link:hover {
+  background: var(--overlay);
+}
+
+.sidebar__footer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: var(--border-width) solid var(--border-light);
+}
+
+.layout-staff__main {
+  flex: 1;
+  padding: var(--space-4);
+  overflow-y: auto;
+}
+
+@media (min-width: 768px) {
+  .layout-staff__main {
+    padding: var(--space-6);
+  }
+}
+
+/* ============================================================
+   KHUNG DON GIAN (layout-auth / layout-error)
+   ============================================================ */
+.layout-auth {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.layout-auth__header {
+  padding: var(--space-4);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: var(--border-width) solid var(--border-light);
+  background: var(--surface);
+}
+
+.layout-auth__brand {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.layout-auth__main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 440px;
+  background: var(--surface-raised);
+  border: var(--border-width) solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.auth-card__title {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-bold);
+  color: var(--text);
+  line-height: var(--leading-tight);
+}
+
+/* ============================================================
+   THANH DIEU HUONG (NAVBAR)
+   ============================================================ */
+.navbar {
+  background: var(--surface-raised);
+  border-bottom: var(--border-width) solid var(--border-light);
+}
+
+.navbar__container {
+  max-width: var(--content-max-student);
+  margin-inline: auto;
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.navbar__brand {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+  color: var(--primary);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.navbar__nav {
+  display: none;
+  list-style: none;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+@media (min-width: 768px) {
+  .navbar__nav {
+    display: flex;
+  }
+}
+
+.navbar__link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--text);
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  transition: background var(--duration-fast) var(--easing-std);
+}
+
+.navbar__link:hover {
+  background: var(--overlay);
+}
+
+.navbar__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.navbar__bell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  color: var(--text);
+  text-decoration: none;
+  border-radius: var(--radius-md);
+}
+
+.navbar__bell:hover {
+  background: var(--overlay);
+}
+
+/* ============================================================
+   THANH TAB DUOI (BOTTOM NAVIGATION - MOBILE)
+   ============================================================ */
+.nav-bottom {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--nav-bottom-height);
+  padding-bottom: env(safe-area-inset-bottom);
+  background: var(--surface-raised);
+  border-top: var(--border-width) solid var(--border-light);
+  display: flex;
+  align-items: flex-start;
+  padding-top: 4px;
+  z-index: 100;
+}
+
+.nav-bottom__item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 44px;
+  padding: 6px 4px;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+}
+
+.nav-bottom__item:hover,
+.nav-bottom__item[aria-current="page"] {
+  color: var(--primary);
+}
+
+.nav-bottom__icon {
+  width: 24px;
+  height: 24px;
+}
+
+@media (min-width: 768px) {
+  .nav-bottom {
+    display: none;
+  }
+}
+
+/* ============================================================
+   NUT (BUTTON)
+   ============================================================ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  min-width: 44px;
+  padding: var(--space-3) var(--space-6);
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  font-family: var(--font-sans);
+  border-radius: var(--radius-md);
+  border: var(--border-width) solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    background var(--duration-fast) var(--easing-std),
+    border-color var(--duration-fast) var(--easing-std),
+    color var(--duration-fast) var(--easing-std);
+}
+
+.btn:focus-visible {
+  outline: var(--border-width-thick) solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+.btn--primary {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+.btn--primary:hover {
+  background: var(--primary-hover);
+  color: var(--on-primary);
+}
+
+.btn--accent {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.btn--accent:hover {
+  background: var(--accent-hover);
+}
+
+.btn--secondary {
+  background: transparent;
+  color: var(--primary);
+  border-color: var(--border);
+}
+
+.btn--secondary:hover {
+  background: var(--overlay);
+}
+
+.btn--danger {
+  background: var(--danger);
+  color: var(--on-danger);
+}
+
+.btn--sm {
+  min-height: 36px;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-sm);
+}
+
+.btn--block {
+  display: flex;
+  width: 100%;
+}
+
+/* ============================================================
+   O NHAP & FORM FIELD
+   ============================================================ */
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.form-field__label {
+  display: block;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--text);
+}
+
+.form-field__input {
+  display: block;
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-base);
+  font-family: var(--font-sans);
+  color: var(--text);
+  background: var(--surface-raised);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-md);
+  transition: border-color var(--duration-fast) var(--easing-std);
+}
+
+.form-field__input:focus {
+  outline: var(--border-width-thick) solid var(--border-focus);
+  outline-offset: 2px;
+  border-color: var(--border-focus);
+}
+
+.form-field__input[aria-invalid="true"] {
+  border-color: var(--danger);
+}
+
+.form-field__error {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-top: var(--space-1);
+  font-size: var(--text-sm);
+  color: var(--danger);
+}
+
+/* ============================================================
+   THE (CARD & TICKET)
+   ============================================================ */
+.card {
+  background: var(--surface-raised);
+  border: var(--border-width) solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.ticket {
+  background: var(--surface-raised);
+  border: var(--border-width) solid var(--border-light);
+  border-radius: var(--radius-md);
+}
+
+.ticket__body {
+  padding: var(--space-5);
+}
+
+.ticket__stub {
+  position: relative;
+  padding: var(--space-4) var(--space-5);
+  border-top: var(--border-width) dashed var(--border);
+}
+
+.ticket__stub::before,
+.ticket__stub::after {
+  content: "";
+  position: absolute;
+  top: -9px;
+  width: 16px;
+  height: 16px;
+  background: var(--bg);
+  border: var(--border-width) solid var(--border-light);
+  border-radius: 50%;
+}
+
+.ticket__stub::before {
+  left: -9px;
+  clip-path: inset(0 0 0 50%);
+}
+
+.ticket__stub::after {
+  right: -9px;
+  clip-path: inset(0 50% 0 0);
+}
+
+/* ============================================================
+   THE CHU DE SANG / TOI (THEME SWITCHER)
+   ============================================================ */
+.theme-switcher {
+  display: inline-flex;
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.theme-switcher__btn {
+  padding: var(--space-1) var(--space-3);
+  min-height: 36px;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  font-family: var(--font-sans);
+  background: transparent;
+  color: var(--text-muted);
+  border: none;
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--easing-std),
+    color var(--duration-fast) var(--easing-std);
+}
+
+.theme-switcher__btn[aria-pressed="true"] {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+.theme-switcher__btn:focus-visible {
+  outline: var(--border-width-thick) solid var(--border-focus);
+  outline-offset: -2px;
+}
+
+/* ============================================================
+   THONG BAO (ALERT)
+   ============================================================ */
+.alert {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  border: var(--border-width) solid transparent;
+  font-size: var(--text-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.alert--error {
+  background: #fef2f2;
+  color: var(--danger);
+  border-color: #fca5a5;
+}
+
+[data-theme="dark"] .alert--error {
+  background: #2d1414;
+  color: #fca5a5;
+  border-color: #7f1d1d;
+}
+
+.alert--success {
+  background: #f0fdf4;
+  color: #166534;
+  border-color: #86efac;
+}
+
+[data-theme="dark"] .alert--success {
+  background: #0f291e;
+  color: #86efac;
+  border-color: #14532d;
+}
+
+.alert--info {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--border-light);
+}
+
+/* ============================================================
+   CHAN TRANG (FOOTER)
+   ============================================================ */
+.footer {
+  border-top: var(--border-width) solid var(--border-light);
+  background: var(--surface);
+  padding: var(--space-4);
+  text-align: center;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}

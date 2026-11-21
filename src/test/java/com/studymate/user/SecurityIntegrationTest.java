@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -18,6 +19,7 @@ import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.unauthenticated;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -251,5 +253,121 @@ class SecurityIntegrationTest {
 
         // Email duoc cat khoang trang va chuyen chu thuong
         assertThat(userRepository.findByEmail("trimmed.user@example.com")).isPresent();
+    }
+
+    @Test
+    @DisplayName("(12) Đăng nhập thật qua POST /login, GET / hiện họ tên và không chứa chuỗi hash; model không chứa password")
+    void test12_realLoginDisplaysFullNameAndNoPasswordHash() throws Exception {
+        User user = new User();
+        user.setEmail("student12@example.com");
+        user.setPasswordHash(passwordEncoder.encode("secretPass123"));
+        user.setFullName("Nguyen Van Muoi Hai");
+        user.setRole(Role.STUDENT);
+        user.setEnabled(true);
+        user.setCreatedAt(LocalDateTime.now());
+        userRepository.save(user);
+
+        var loginResult = mockMvc.perform(post("/login")
+                        .with(csrf())
+                        .param("username", "student12@example.com")
+                        .param("password", "secretPass123"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/"))
+                .andReturn();
+
+        MockHttpSession session = (MockHttpSession) loginResult.getRequest().getSession(false);
+        assertThat(session).isNotNull();
+
+        mockMvc.perform(get("/").session(session))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Nguyen Van Muoi Hai")))
+                .andExpect(content().string(not(containsString("$2"))))
+                .andExpect(model().attributeDoesNotExist("password"))
+                .andExpect(model().attributeDoesNotExist("passwordHash"));
+    }
+
+    @Test
+    @DisplayName("(13) Menu theo role: STUDENT không chứa liên kết /admin/users và /manager/*; ADMIN chứa /admin/users")
+    void test13_menuByRoleContentCheck() throws Exception {
+        User student = new User();
+        student.setEmail("student13@example.com");
+        student.setPasswordHash(passwordEncoder.encode("studentPass123"));
+        student.setFullName("Sinh Vien Muoi Ba");
+        student.setRole(Role.STUDENT);
+        student.setEnabled(true);
+        student.setCreatedAt(LocalDateTime.now());
+        userRepository.save(student);
+
+        User admin = new User();
+        admin.setEmail("admin13@example.com");
+        admin.setPasswordHash(passwordEncoder.encode("adminPass123"));
+        admin.setFullName("Quan Tri Vien Muoi Ba");
+        admin.setRole(Role.ADMIN);
+        admin.setEnabled(true);
+        admin.setCreatedAt(LocalDateTime.now());
+        userRepository.save(admin);
+
+        var studentLogin = mockMvc.perform(post("/login")
+                        .with(csrf())
+                        .param("username", "student13@example.com")
+                        .param("password", "studentPass123"))
+                .andExpect(status().is3xxRedirection())
+                .andReturn();
+        MockHttpSession studentSession = (MockHttpSession) studentLogin.getRequest().getSession(false);
+
+        mockMvc.perform(get("/").session(studentSession))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("/matching")))
+                .andExpect(content().string(containsString("/groups")))
+                .andExpect(content().string(containsString("/rooms")))
+                .andExpect(content().string(containsString("/bookings")))
+                .andExpect(content().string(containsString("/chat")))
+                .andExpect(content().string(containsString("/notifications")))
+                .andExpect(content().string(containsString("/profile")))
+                .andExpect(content().string(not(containsString("/admin/users"))))
+                .andExpect(content().string(not(containsString("/manager/"))));
+
+        var adminLogin = mockMvc.perform(post("/login")
+                        .with(csrf())
+                        .param("username", "admin13@example.com")
+                        .param("password", "adminPass123"))
+                .andExpect(status().is3xxRedirection())
+                .andReturn();
+        MockHttpSession adminSession = (MockHttpSession) adminLogin.getRequest().getSession(false);
+
+        mockMvc.perform(get("/").session(adminSession))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("/admin/users")));
+    }
+
+    @Test
+    @DisplayName("(14) Nút đăng xuất là form POST có trường _csrf, không có liên kết GET tới /logout")
+    void test14_logoutIsPostFormWithCsrfNoGetLink() throws Exception {
+        User user = new User();
+        user.setEmail("user14@example.com");
+        user.setPasswordHash(passwordEncoder.encode("userPass14"));
+        user.setFullName("User Muoi Bon");
+        user.setRole(Role.STUDENT);
+        user.setEnabled(true);
+        user.setCreatedAt(LocalDateTime.now());
+        userRepository.save(user);
+
+        var login = mockMvc.perform(post("/login")
+                        .with(csrf())
+                        .param("username", "user14@example.com")
+                        .param("password", "userPass14"))
+                .andExpect(status().is3xxRedirection())
+                .andReturn();
+        MockHttpSession session = (MockHttpSession) login.getRequest().getSession(false);
+
+        String content = mockMvc.perform(get("/").session(session))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("action=\"/logout\"")))
+                .andExpect(content().string(containsString("method=\"post\"")))
+                .andExpect(content().string(containsString("name=\"_csrf\"")))
+                .andReturn().getResponse().getContentAsString();
+
+        assertThat(content).doesNotContain("href=\"/logout\"");
+        assertThat(content).doesNotContain("href='/logout'");
     }
 }

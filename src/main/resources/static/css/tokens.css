@@ -1,0 +1,158 @@
+/* tokens.css - SOURCE OF TRUTH theo docs/DESIGN.md */
+
+:root {
+  color-scheme: light;
+
+  /* Mau nen */
+  --bg: #eef6f7;
+  --surface: #d6ecf0;
+  --surface-raised: #ffffff;
+  --overlay: rgba(11, 93, 122, 0.08);
+
+  /* Chu */
+  --text: #0f2a33;
+  --text-muted: #4a6670;
+  --text-inverse: #eef6f7;
+
+  /* Mau chinh */
+  --primary: #0b5d7a;
+  --primary-hover: #094d66;
+  --on-primary: #eef6f7;
+
+  /* Mau nhan am */
+  --accent: #c2410c;
+  --accent-hover: #a33509;
+  --on-accent: #ffffff;
+
+  /* Mau nguy hiem */
+  --danger: #b91c1c;
+  --on-danger: #ffffff;
+
+  /* Duong ke va vien */
+  --border: #4a7a87;
+  --border-light: #8fb8c4;
+  --border-focus: #0b5d7a;
+
+  /* Phong chu */
+  --font-sans: "Be Vietnam Pro", "Noto Sans", system-ui, -apple-system, sans-serif;
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-md: 18px;
+  --text-lg: 20px;
+  --text-xl: 24px;
+  --text-2xl: 32px;
+  --leading-tight: 1.25;
+  --leading-base: 1.5;
+  --leading-loose: 1.75;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* Khoang cach 8dp */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* Bo goc */
+  --radius-sm: 3px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-full: 9999px;
+
+  /* Bong do */
+  --shadow-sm: 0 1px 3px rgba(11, 93, 122, 0.08);
+  --shadow-md: 0 4px 12px rgba(11, 93, 122, 0.1);
+
+  /* Do day duong ke */
+  --border-width: 1px;
+  --border-width-thick: 2px;
+
+  /* Chuyen dong */
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --duration-slow: 350ms;
+  --easing-std: cubic-bezier(0.4, 0, 0.2, 1);
+  --easing-out: cubic-bezier(0, 0, 0.2, 1);
+
+  /* Khung bo cuc */
+  --nav-bottom-height: calc(56px + env(safe-area-inset-bottom));
+  --content-max-student: 960px;
+
+  /* Trang thai dat phong (light) */
+  --status-pending-bg: #fef3c7;
+  --status-pending-text: #7a5500;
+  --status-pending-border: #d97706;
+
+  --status-approved-bg: #ccf0eb;
+  --status-approved-text: #0a5248;
+  --status-approved-border: #0d7a6c;
+
+  --status-checkin-bg: var(--primary);
+  --status-checkin-text: var(--on-primary);
+  --status-checkin-border: var(--primary);
+
+  --status-noshow-bg: #fddfd6;
+  --status-noshow-text: #7a1f00;
+  --status-noshow-border: #c2410c;
+
+  --status-cancelled-bg: #e8edef;
+  --status-cancelled-text: #3b464c;
+  --status-cancelled-border: #6b7c82;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg: #0e1b20;
+  --surface: #14262d;
+  --surface-raised: #1c3540;
+  --overlay: rgba(91, 184, 208, 0.08);
+
+  --text: #e6f1f3;
+  --text-muted: #9db5bc;
+  --text-inverse: #08222b;
+
+  --primary: #5bb8d0;
+  --primary-hover: #74c5da;
+  --on-primary: #08222b;
+
+  --accent: #f08a5d;
+  --accent-hover: #f5a07c;
+  --on-accent: #1a0f0a;
+
+  --danger: #f87171;
+  --on-danger: #1a0000;
+
+  --border: #5090a0;
+  --border-light: #2e4e58;
+  --border-focus: #5bb8d0;
+
+  --status-pending-bg: #2d1b00;
+  --status-pending-text: #fde68a;
+  --status-pending-border: #d97706;
+
+  --status-approved-bg: #052a26;
+  --status-approved-text: #81d4ca;
+  --status-approved-border: #34b8ae;
+
+  --status-checkin-bg: var(--primary);
+  --status-checkin-text: var(--on-primary);
+  --status-checkin-border: var(--primary);
+
+  --status-noshow-bg: #2d0e00;
+  --status-noshow-text: #fdba9e;
+  --status-noshow-border: #f08a5d;
+
+  --status-cancelled-bg: #1a2326;
+  --status-cancelled-text: #a8b8bc;
+  --status-cancelled-border: #4a6670;
+}

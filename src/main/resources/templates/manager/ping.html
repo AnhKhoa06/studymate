@@ -1,11 +1,10 @@
 <!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <title>Manager Ping</title>
-</head>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/staff :: layout('Manager Ping', ~{::content})}">
 <body>
-<!-- Endpoint nay chi de kiem thu phan quyen, se xoa sau khi hoan thanh gia doan 0A -->
-<p>manager ping ok</p>
+<div th:fragment="content">
+    <h1 class="page-title">Manager Ping</h1>
+    <p>manager ping ok</p>
+</div>
 </body>
 </html>
