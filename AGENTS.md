@@ -52,3 +52,10 @@ Công nghệ: Java 21, Spring Boot 4.1.x, Maven, Spring MVC + Thymeleaf, Spring 
 - Chỉ sửa file trong phạm vi được yêu cầu; không tự đổi `pom.xml`, cấu hình bảo mật hay migration cũ.
 - Sau khi sửa, giải thích ngắn gọn thay đổi và cách kiểm tra.
 - Không hard-code khóa bí mật hay mật khẩu.
+
+## Tài liệu tham chiếu
+
+- docs/PROPOSAL.md: chức năng, vai trò, bảo mật, dữ liệu (đọc khi cần làm rõ yêu cầu).
+- docs/PHAN-CONG.md: thứ tự và phạm vi từng module (chỉ đọc phần module được giao).
+- docs/DESIGN.md: hệ thống thiết kế giao diện (bắt buộc đọc khi làm template hoặc CSS).
+- Chỉ đọc các file này khi việc đang làm liên quan, không đọc hết mỗi lần.
