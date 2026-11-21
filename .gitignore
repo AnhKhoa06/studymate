@@ -36,3 +36,5 @@ build/
 application-local.properties
 .env
 
+### Agent skills cài cục bộ ###
+.agents/skills/ui-ux-pro-max/
