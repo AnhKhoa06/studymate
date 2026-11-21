@@ -1,0 +1,17 @@
+# application-local.properties.example
+# Sao chep file nay thanh application-local.properties va dien gia tri that (file .properties khong duoc commit)
+# application-local.properties da nam trong .gitignore
+
+# Ket noi MySQL local (thay bang thong tin may cua ban)
+spring.datasource.url=jdbc:mysql://localhost:3306/studymate_oop?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Ho_Chi_Minh
+spring.datasource.username=root
+spring.datasource.password=THAY_BANG_MAT_KHAU_MYSQL_CUA_BAN
+
+# Mat khau du lieu mau (chi dung o local, khong commit gia tri that)
+app.seed.password=THAY_BANG_MAT_KHAU_MUON_DUNG_DE_SEED
+
+# Bat log SQL khi phat trien local (giup dem so truy van moi request)
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+logging.level.org.hibernate.SQL=DEBUG
+logging.level.org.hibernate.orm.jdbc.bind=TRACE
