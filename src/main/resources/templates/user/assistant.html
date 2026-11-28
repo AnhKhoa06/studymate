@@ -10,7 +10,7 @@
         </div>
     </div>
 
-    <!-- Ket qua tra loi moi nhat -->
+    <!-- Ket qua tra loi moi nhat theo kieu hoi thoai chatbot AI -->
     <section th:if="${latestResponse != null}" class="card assistant-reply">
         <div class="profile-section__head">
             <h2 class="profile-section__title" th:text="${latestResponse.type.label}">Phản hồi</h2>
@@ -18,7 +18,27 @@
                   th:classappend="${latestResponse.fallbackUsed ? ' badge--accent' : ' badge--primary'}"
                   th:text="${latestResponse.fallbackUsed ? 'Chế độ dự phòng' : 'Trợ lý LLM'}"></span>
         </div>
-        <pre class="assistant-reply__text" th:text="${latestResponse.answer}"></pre>
+
+        <div class="assistant-chat">
+            <!-- Tin nhan cua nguoi dung o goc tren ben phai -->
+            <div th:if="${latestUserPrompt != null and !#strings.isEmpty(latestUserPrompt)}" class="assistant-msg assistant-msg--user">
+                <div class="assistant-msg__bubble assistant-msg__bubble--user">
+                    <pre class="assistant-msg__text" th:text="${latestUserPrompt}"></pre>
+                </div>
+                <span class="assistant-msg__avatar assistant-msg__avatar--user" aria-label="Bạn" title="Bạn"
+                      th:text="${currentUser != null ? #strings.toUpperCase(#strings.substring(currentUser.fullName, 0, 1)) : 'B'}">B</span>
+            </div>
+
+            <!-- Cau tra loi cua AI o ben trai -->
+            <div class="assistant-msg assistant-msg--ai">
+                <span class="assistant-msg__avatar assistant-msg__avatar--ai" aria-label="Trợ lý AI" title="Trợ lý AI">
+                    <svg class="icon icon--sm" aria-hidden="true"><use href="#icon-sparkles"/></svg>
+                </span>
+                <div class="assistant-msg__bubble assistant-msg__bubble--ai">
+                    <pre class="assistant-reply__text" th:text="${latestResponse.answer}"></pre>
+                </div>
+            </div>
+        </div>
     </section>
 
     <div class="profile-grid">
@@ -82,8 +102,23 @@
                     <span class="badge badge--sm" th:if="${item.fallbackUsed}">Dự phòng</span>
                     <span class="text-muted" th:text="${#temporals.format(item.createdAt, 'dd/MM HH:mm')}"></span>
                 </div>
-                <p class="assistant-history__prompt" th:text="${item.promptSummary}"></p>
-                <pre class="assistant-reply__text" th:text="${item.responseText}"></pre>
+                <div class="assistant-chat assistant-chat--compact">
+                    <div class="assistant-msg assistant-msg--user">
+                        <div class="assistant-msg__bubble assistant-msg__bubble--user">
+                            <p class="assistant-msg__text" th:text="${item.promptSummary}"></p>
+                        </div>
+                        <span class="assistant-msg__avatar assistant-msg__avatar--user" aria-hidden="true"
+                              th:text="${currentUser != null ? #strings.toUpperCase(#strings.substring(currentUser.fullName, 0, 1)) : 'B'}">B</span>
+                    </div>
+                    <div class="assistant-msg assistant-msg--ai">
+                        <span class="assistant-msg__avatar assistant-msg__avatar--ai" aria-hidden="true">
+                            <svg class="icon icon--sm" aria-hidden="true"><use href="#icon-sparkles"/></svg>
+                        </span>
+                        <div class="assistant-msg__bubble assistant-msg__bubble--ai">
+                            <pre class="assistant-reply__text" th:text="${item.responseText}"></pre>
+                        </div>
+                    </div>
+                </div>
             </article>
         </div>
     </section>

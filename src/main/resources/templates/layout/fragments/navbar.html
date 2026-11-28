@@ -62,6 +62,11 @@
                         <span>Hồ sơ</span>
                     </a>
 
+                    <a th:href="@{/change-password}" class="user-menu__link">
+                        <svg class="icon user-menu__icon" aria-hidden="true"><use href="#icon-lock"/></svg>
+                        <span>Đổi mật khẩu</span>
+                    </a>
+
                     <!-- Nhom giao dien: label + cum 3 nut theme (hien thi duoi 1024px, an tu 1024px) -->
                     <div class="user-menu__theme-group">
                         <span class="user-menu__theme-label">Giao diện</span>
@@ -122,7 +127,7 @@
 
             <a th:href="@{/profile}" class="user-menu__link">
                 <svg class="icon user-menu__icon" aria-hidden="true"><use href="#icon-user-circle"/></svg>
-                <span>Hồ sơ</span>
+                <span th:text="${currentRole == 'MANAGER' or currentRole == 'ADMIN'} ? 'Thông tin tài khoản' : 'Hồ sơ'">Hồ sơ</span>
             </a>
 
             <!-- Nhom giao dien: label + cum 3 nut theme (hien thi duoi 1024px, an tu 1024px) -->

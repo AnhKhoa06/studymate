@@ -1,14 +1,21 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
-      th:replace="${currentRole == 'MANAGER' or currentRole == 'ADMIN'} ? ~{layout/staff :: layout('Hồ sơ học tập', ~{::content})} : ~{layout/student :: layout('Hồ sơ học tập', ~{::content})}">
+      th:replace="${currentRole == 'MANAGER' or currentRole == 'ADMIN'} ? ~{layout/staff :: layout('Thông tin tài khoản', ~{::content})} : ~{layout/student :: layout('Hồ sơ học tập', ~{::content})}">
 <body>
 <div th:fragment="content">
     <div class="profile-header">
         <div>
-            <h1 class="page-title" style="margin-bottom: var(--space-1); border-bottom: none; padding-bottom: 0;">Hồ sơ học tập</h1>
-            <p class="profile-subtitle">Cập nhật thông tin khoa, lớp, môn đang học và khung giờ rảnh để hệ thống gợi ý bạn học phù hợp.</p>
+            <h1 class="page-title" style="margin-bottom: var(--space-1); border-bottom: none; padding-bottom: 0;"
+                th:text="${currentRole == 'MANAGER' or currentRole == 'ADMIN'} ? 'Thông tin tài khoản' : 'Hồ sơ học tập'">Hồ sơ học tập</h1>
+            <p class="profile-subtitle"
+               th:if="${currentRole == 'ADMIN'}">Cập nhật tên hiển thị và ghi chú cho tài khoản quản trị viên hệ thống.</p>
+            <p class="profile-subtitle"
+               th:if="${currentRole == 'MANAGER'}">Cập nhật tên hiển thị và ghi chú cho tài khoản cán bộ quản lý phòng học.</p>
+            <p class="profile-subtitle"
+               th:unless="${currentRole == 'MANAGER' or currentRole == 'ADMIN'}">Cập nhật thông tin khoa, lớp, môn đang học và khung giờ rảnh để hệ thống gợi ý bạn học phù hợp.</p>
         </div>
-        <button type="submit" form="profileForm" class="btn btn--primary">Lưu hồ sơ</button>
+        <button th:unless="${currentRole == 'MANAGER' or currentRole == 'ADMIN'}"
+                type="submit" form="profileForm" class="btn btn--primary">Lưu hồ sơ</button>
     </div>
 
     <form th:action="@{/profile}" th:object="${profileForm}" method="post" class="profile-form" id="profileForm">
@@ -16,7 +23,88 @@
             <p th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
         </div>
 
-        <div class="profile-grid">
+        <!-- Giao dien gon nhe danh rieng cho Quan ly va Admin -->
+        <section th:if="${currentRole == 'MANAGER' or currentRole == 'ADMIN'}" class="card profile-section" style="max-width: 640px;">
+            <div class="profile-section__head">
+                <h2 class="profile-section__title">Thông tin cơ bản</h2>
+                <div style="display: flex; gap: var(--space-2); align-items: center;">
+                    <span class="badge badge--primary" th:text="${profile.email}"></span>
+                    <span class="badge badge--sm"
+                          th:text="${currentRole == 'ADMIN' ? 'Quản trị viên' : 'Quản lý phòng'}"></span>
+                </div>
+            </div>
+
+            <div class="form-field">
+                <label class="form-field__label" for="staffFullName">Họ và tên <span class="required">*</span></label>
+                <input class="form-field__input" type="text" id="staffFullName" th:field="*{fullName}" maxlength="100" required>
+                <p class="form-field__error" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"></p>
+            </div>
+
+            <div class="form-field">
+                <label class="form-field__label" for="staffBio">Ghi chú</label>
+                <textarea class="form-field__input" id="staffBio" th:field="*{bio}" rows="3" maxlength="500"
+                          placeholder="Thông tin liên hệ nội bộ hoặc ghi chú ngắn..."></textarea>
+                <p class="form-field__error" th:if="${#fields.hasErrors('bio')}" th:errors="*{bio}"></p>
+            </div>
+
+            <div style="padding-top: var(--space-2); border-top: var(--border-width) solid var(--border-light);">
+                <button type="button" class="btn btn--secondary btn--sm" id="toggleStaffPasswordBtn"
+                        th:attr="aria-expanded=${showPasswordSection != null and showPasswordSection ? 'true' : 'false'}"
+                        th:text="${showPasswordSection != null and showPasswordSection} ? 'Hủy đổi mật khẩu' : 'Đổi mật khẩu'">Đổi mật khẩu</button>
+
+                <div id="staffPasswordSection"
+                     th:hidden="${showPasswordSection == null or !showPasswordSection}"
+                     th:style="${showPasswordSection != null and showPasswordSection} ? 'display: flex; flex-direction: column; gap: var(--space-3); margin-top: var(--space-4);' : 'display: none; flex-direction: column; gap: var(--space-3); margin-top: var(--space-4);'">
+                    <div class="form-field">
+                        <label class="form-field__label" for="staffCurrentPassword">Mật khẩu hiện tại <span class="required">*</span></label>
+                        <div class="input-wrapper">
+                            <input class="form-field__input input-with-toggle" type="password" id="staffCurrentPassword" name="currentPassword"
+                                   th:disabled="${showPasswordSection == null or !showPasswordSection}"
+                                   required placeholder="Nhập mật khẩu hiện tại">
+                            <button type="button" class="btn-toggle-password" aria-label="Hiện mật khẩu" aria-pressed="false" title="Hiện mật khẩu">
+                                <svg class="icon icon-eye-show" aria-hidden="true"><use href="#icon-eye"/></svg>
+                                <svg class="icon icon-eye-hide" aria-hidden="true" style="display:none;"><use href="#icon-eye-slash"/></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-row-2">
+                        <div class="form-field">
+                            <label class="form-field__label" for="staffNewPassword">Mật khẩu mới <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <input class="form-field__input input-with-toggle" type="password" id="staffNewPassword" name="newPassword"
+                                       th:disabled="${showPasswordSection == null or !showPasswordSection}"
+                                       required minlength="8" placeholder="Tối thiểu 8 ký tự">
+                                <button type="button" class="btn-toggle-password" aria-label="Hiện mật khẩu" aria-pressed="false" title="Hiện mật khẩu">
+                                    <svg class="icon icon-eye-show" aria-hidden="true"><use href="#icon-eye"/></svg>
+                                    <svg class="icon icon-eye-hide" aria-hidden="true" style="display:none;"><use href="#icon-eye-slash"/></svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-field">
+                            <label class="form-field__label" for="staffConfirmPassword">Nhập lại mật khẩu mới <span class="required">*</span></label>
+                            <div class="input-wrapper">
+                                <input class="form-field__input input-with-toggle" type="password" id="staffConfirmPassword" name="confirmPassword"
+                                       th:disabled="${showPasswordSection == null or !showPasswordSection}"
+                                       required minlength="8" placeholder="Nhập lại mật khẩu mới">
+                                <button type="button" class="btn-toggle-password" aria-label="Hiện mật khẩu" aria-pressed="false" title="Hiện mật khẩu">
+                                    <svg class="icon icon-eye-show" aria-hidden="true"><use href="#icon-eye"/></svg>
+                                    <svg class="icon icon-eye-hide" aria-hidden="true" style="display:none;"><use href="#icon-eye-slash"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; margin-top: var(--space-2);">
+                <button type="submit" class="btn btn--primary">Lưu thay đổi</button>
+            </div>
+        </section>
+
+        <!-- Giao dien day du danh cho Sinh vien -->
+        <div th:unless="${currentRole == 'MANAGER' or currentRole == 'ADMIN'}" class="profile-grid">
             <!-- Thong tin ca nhan & hoc tap -->
             <section class="card profile-section">
                 <div class="profile-section__head">
@@ -187,6 +275,32 @@
                         '<input class="form-field__input" type="time" name="availabilitySlots[' + idx + '].endTime" value="10:00">' +
                         '<button type="button" class="btn btn--secondary btn--sm btn-remove-row" aria-label="Xóa khung giờ">Xóa</button>';
                     slotsContainer.appendChild(row);
+                });
+            }
+
+            var togglePwBtn = document.getElementById("toggleStaffPasswordBtn");
+            var pwSection = document.getElementById("staffPasswordSection");
+            if (togglePwBtn && pwSection) {
+                function syncPasswordSection(isOpen) {
+                    if (isOpen) {
+                        pwSection.removeAttribute("hidden");
+                        pwSection.style.display = "flex";
+                    } else {
+                        pwSection.setAttribute("hidden", "");
+                        pwSection.style.display = "none";
+                    }
+                    pwSection.querySelectorAll("input").forEach(function (inp) {
+                        inp.disabled = !isOpen;
+                        if (!isOpen) inp.value = "";
+                    });
+                    togglePwBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+                    togglePwBtn.textContent = isOpen ? "Hủy đổi mật khẩu" : "Đổi mật khẩu";
+                }
+
+                syncPasswordSection(!pwSection.hasAttribute("hidden"));
+
+                togglePwBtn.addEventListener("click", function () {
+                    syncPasswordSection(pwSection.hasAttribute("hidden"));
                 });
             }
         })();

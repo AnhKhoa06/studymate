@@ -18,10 +18,14 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ActivityLogService activityLogService;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository,
+                       PasswordEncoder passwordEncoder,
+                       ActivityLogService activityLogService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.activityLogService = activityLogService;
     }
 
     // Dang ky tai khoan moi. Luon tra ve STUDENT, bo qua moi truong role trong request.
@@ -59,6 +63,36 @@ public class UserService {
     @Transactional(readOnly = true)
     public Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email.trim().toLowerCase(Locale.ROOT));
+    }
+
+    @Transactional
+    public void changePassword(Long userId, String currentPassword, String newPassword, String confirmPassword) {
+        if (currentPassword == null || currentPassword.isBlank()) {
+            throw new IllegalArgumentException("Vui lòng nhập mật khẩu hiện tại");
+        }
+        if (newPassword == null || newPassword.length() < 8) {
+            throw new IllegalArgumentException("Mật khẩu mới tối thiểu 8 ký tự");
+        }
+        if (newPassword.getBytes(StandardCharsets.UTF_8).length > 72) {
+            throw new IllegalArgumentException("Mật khẩu mới tối đa 72 byte");
+        }
+        if (!newPassword.equals(confirmPassword)) {
+            throw new IllegalArgumentException("Mật khẩu nhập lại không khớp");
+        }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy tài khoản"));
+
+        if (!passwordEncoder.matches(currentPassword, user.getPasswordHash())) {
+            throw new IllegalArgumentException("Mật khẩu hiện tại không chính xác");
+        }
+        if (passwordEncoder.matches(newPassword, user.getPasswordHash())) {
+            throw new IllegalArgumentException("Mật khẩu mới phải khác mật khẩu hiện tại");
+        }
+
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+        activityLogService.record(userId, user.getEmail(), "PASSWORD_CHANGED", "Người dùng tự đổi mật khẩu");
     }
 
     // Exception noi bo, khai bao o day de gon

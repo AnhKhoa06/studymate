@@ -36,16 +36,16 @@
         </div>
 
         <div class="form-field">
-            <div class="form-field__label-row">
-                <label class="form-field__label" for="password">Mật khẩu</label>
-                <a th:href="@{/forgot-password}" class="auth-card__forgot">Quên mật khẩu?</a>
-            </div>
+            <label class="form-field__label" for="password">Mật khẩu</label>
             <div class="input-wrapper">
                 <input class="form-field__input input-with-toggle" type="password" id="password" name="password" required placeholder="Nhập mật khẩu">
                 <button type="button" class="btn-toggle-password" aria-label="Hiện mật khẩu" aria-pressed="false" title="Hiện mật khẩu">
                     <svg class="icon icon-eye-show" aria-hidden="true"><use href="#icon-eye"/></svg>
                     <svg class="icon icon-eye-hide" aria-hidden="true" style="display:none;"><use href="#icon-eye-slash"/></svg>
                 </button>
+            </div>
+            <div class="form-field__footer-row">
+                <a th:href="@{/forgot-password}" class="auth-card__forgot">Quên mật khẩu?</a>
             </div>
         </div>
 

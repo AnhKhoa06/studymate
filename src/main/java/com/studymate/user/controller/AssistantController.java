@@ -38,6 +38,7 @@ public class AssistantController {
         Long userId = requireCurrentUserId();
         try {
             AssistantResponseDto response = assistantService.askStudyAssistant(userId, question);
+            redirectAttributes.addFlashAttribute("latestUserPrompt", question != null ? question.trim() : "");
             redirectAttributes.addFlashAttribute("latestResponse", response);
             if (response.rateLimited()) {
                 redirectAttributes.addFlashAttribute("infoMessage", "Bạn đã dùng hết lượt AI trong giờ, đang hiển thị gợi ý dự phòng.");
@@ -61,6 +62,10 @@ public class AssistantController {
                         .toList();
         try {
             AssistantResponseDto response = assistantService.summarizeChatToChecklist(userId, groupName, lines);
+            String promptDisplay = (groupName != null && !groupName.isBlank())
+                    ? "[" + groupName.trim() + "]\n" + String.join("\n", lines)
+                    : String.join("\n", lines);
+            redirectAttributes.addFlashAttribute("latestUserPrompt", promptDisplay);
             redirectAttributes.addFlashAttribute("latestResponse", response);
             if (response.rateLimited()) {
                 redirectAttributes.addFlashAttribute("infoMessage", "Bạn đã dùng hết lượt AI trong giờ, đang hiển thị checklist dự phòng.");

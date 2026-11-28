@@ -37,4 +37,9 @@ public class ProfileUpdateRequest {
 
     @Valid
     private List<AvailabilitySlotDto> availabilitySlots = new ArrayList<>();
+
+    // Tuy chon doi mat khau (chi su dung o trang Thong tin tai khoan cua Quan ly / Admin)
+    private String currentPassword;
+    private String newPassword;
+    private String confirmPassword;
 }

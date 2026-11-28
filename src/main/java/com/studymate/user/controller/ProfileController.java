@@ -6,8 +6,10 @@ import com.studymate.user.dto.ProfileUpdateRequest;
 import com.studymate.user.dto.ProfileViewDto;
 import com.studymate.user.dto.SubjectDto;
 import com.studymate.user.entity.AcademicLevel;
+import com.studymate.user.entity.Role;
 import com.studymate.user.entity.StudyGoal;
 import com.studymate.user.service.ProfileService;
+import com.studymate.user.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Controller;
@@ -30,9 +32,11 @@ public class ProfileController {
     private static final Map<Integer, String> DAYS_OF_WEEK = createDaysOfWeek();
 
     private final ProfileService profileService;
+    private final UserService userService;
 
-    public ProfileController(ProfileService profileService) {
+    public ProfileController(ProfileService profileService, UserService userService) {
         this.profileService = profileService;
+        this.userService = userService;
     }
 
     @GetMapping
@@ -54,21 +58,47 @@ public class ProfileController {
                                 Model model,
                                 RedirectAttributes redirectAttributes) {
         Long userId = requireCurrentUserId();
+        boolean wantsPasswordChange = hasText(form.getCurrentPassword())
+                || hasText(form.getNewPassword())
+                || hasText(form.getConfirmPassword());
 
         if (!bindingResult.hasErrors()) {
             try {
                 profileService.updateProfile(userId, form);
-                redirectAttributes.addFlashAttribute("successMessage", "Đã cập nhật hồ sơ học tập.");
+                if (wantsPasswordChange) {
+                    userService.changePassword(
+                            userId,
+                            form.getCurrentPassword(),
+                            form.getNewPassword(),
+                            form.getConfirmPassword()
+                    );
+                }
+                Role currentRole = SecurityUtils.getCurrentRole().orElse(Role.STUDENT);
+                String successMsg = (currentRole == Role.MANAGER || currentRole == Role.ADMIN)
+                        ? (wantsPasswordChange ? "Đã cập nhật thông tin và đổi mật khẩu." : "Đã cập nhật thông tin tài khoản.")
+                        : "Đã cập nhật hồ sơ học tập.";
+                redirectAttributes.addFlashAttribute("successMessage", successMsg);
                 return "redirect:/profile";
             } catch (IllegalArgumentException ex) {
                 bindingResult.reject("profile.invalid", ex.getMessage());
             }
         }
 
+        if (wantsPasswordChange) {
+            model.addAttribute("showPasswordSection", true);
+        }
+        form.setCurrentPassword(null);
+        form.setNewPassword(null);
+        form.setConfirmPassword(null);
+
         ProfileViewDto profile = profileService.getProfileForUser(userId);
         model.addAttribute("profile", profile);
         addReferenceData(model);
         return "user/profile";
+    }
+
+    private boolean hasText(String value) {
+        return value != null && !value.isBlank();
     }
 
     private Long requireCurrentUserId() {

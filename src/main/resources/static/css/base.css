@@ -476,10 +476,10 @@ a:hover {
   min-height: 100dvh;
 }
 
-/* Bo cuc 60/40 (3fr 2fr) tu 900px tro len; duoi 900px an cot anh */
+/* Bo cuc 65/35 (13fr 7fr) tu 900px tro len; duoi 900px an cot anh */
 @media (min-width: 900px) {
   .auth-wrapper {
-    grid-template-columns: 3fr 2fr;
+    grid-template-columns: 13fr 7fr;
   }
 }
 
@@ -558,21 +558,21 @@ a:hover {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: var(--space-4) var(--space-6);
+  padding: var(--space-3) var(--space-5);
   background: var(--bg);
   overflow-y: auto;
 }
 
 @media (min-width: 900px) {
   .auth-main {
-    padding: var(--space-6) var(--space-8);
+    padding: var(--space-4) var(--space-5);
   }
 }
 
 .auth-main__top-bar {
   display: flex;
   justify-content: flex-end;
-  margin-bottom: var(--space-2);
+  margin-bottom: 0;
 }
 
 .auth-main__center {
@@ -580,11 +580,11 @@ a:hover {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   width: 100%;
-  max-width: 420px;
+  max-width: 460px;
   margin: 0 auto;
-  padding: var(--space-2) 0;
+  padding: var(--space-2) 0 var(--space-4);
 }
 
 /* Header thuong hieu truong hoc nam o BÊN NGOÀI phia tren the card */
@@ -600,7 +600,7 @@ a:hover {
   width: 96px;
   height: 96px;
   object-fit: contain;
-  margin-bottom: var(--space-2);
+  margin-bottom: var(--space-5);
 }
 
 .auth-brand__school {
@@ -608,7 +608,7 @@ a:hover {
   font-weight: var(--weight-bold);
   color: var(--primary);
   letter-spacing: 0.5px;
-  margin-bottom: 2px;
+  margin-bottom: var(--space-1);
 }
 
 .auth-brand__portal {
@@ -1148,6 +1148,12 @@ a:hover {
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2);
+}
+
+.form-field__footer-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--space-1);
 }
 
 .auth-card__forgot {
@@ -2233,4 +2239,97 @@ a:hover {
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
   color: var(--text);
+}
+
+/* Khung hoi thoai chatbot AI: gioi han do rong bong bong 2 ben */
+.assistant-chat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-3);
+  background: var(--surface);
+  border: var(--border-width) solid var(--border-light);
+  border-radius: var(--radius-md);
+  max-height: 480px;
+  overflow-y: auto;
+}
+
+.assistant-chat--compact {
+  max-height: none;
+  overflow-y: visible;
+  gap: var(--space-3);
+}
+
+.assistant-msg {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  width: 100%;
+}
+
+.assistant-msg--user {
+  justify-content: flex-end;
+}
+
+.assistant-msg--ai {
+  justify-content: flex-start;
+}
+
+.assistant-msg__avatar {
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  border-radius: var(--radius-full);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  flex-shrink: 0;
+}
+
+.assistant-msg__avatar--user {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+.assistant-msg__avatar--ai {
+  background: var(--surface-raised);
+  color: var(--primary);
+  border: var(--border-width) solid var(--border-light);
+}
+
+.assistant-msg__bubble {
+  max-width: min(72%, 680px);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  word-break: break-word;
+}
+
+.assistant-msg__bubble--user {
+  background: var(--primary);
+  color: var(--on-primary);
+  border-top-right-radius: var(--radius-sm);
+}
+
+.assistant-msg__bubble--ai {
+  background: var(--surface-raised);
+  color: var(--text);
+  border: var(--border-width) solid var(--border-light);
+  border-top-left-radius: var(--radius-sm);
+}
+
+.assistant-msg__text {
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  line-height: var(--leading-base);
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .assistant-msg__bubble {
+    max-width: 85%;
+  }
 }
