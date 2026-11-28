@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="${currentRole == 'MANAGER' or currentRole == 'ADMIN'} ? ~{layout/staff :: layout('Trợ lý AI', ~{::content})} : ~{layout/student :: layout('Trợ lý AI', ~{::content})}">
+<body>
+<div th:fragment="content">
+    <div class="profile-header">
+        <div>
+            <h1 class="page-title" style="margin-bottom: var(--space-1); border-bottom: none; padding-bottom: 0;">Trợ lý học tập AI</h1>
+            <p class="profile-subtitle">Hỏi đáp kế hoạch học nhóm hoặc tóm tắt trao đổi nhóm thành checklist buổi học.</p>
+        </div>
+    </div>
+
+    <!-- Ket qua tra loi moi nhat -->
+    <section th:if="${latestResponse != null}" class="card assistant-reply">
+        <div class="profile-section__head">
+            <h2 class="profile-section__title" th:text="${latestResponse.type.label}">Phản hồi</h2>
+            <span class="badge"
+                  th:classappend="${latestResponse.fallbackUsed ? ' badge--accent' : ' badge--primary'}"
+                  th:text="${latestResponse.fallbackUsed ? 'Chế độ dự phòng' : 'Trợ lý LLM'}"></span>
+        </div>
+        <pre class="assistant-reply__text" th:text="${latestResponse.answer}"></pre>
+    </section>
+
+    <div class="profile-grid">
+        <!-- Hoi dap hoc tap -->
+        <section class="card profile-section">
+            <div class="profile-section__head">
+                <h2 class="profile-section__title">Hỏi trợ lý học tập</h2>
+            </div>
+
+            <form th:action="@{/assistant/ask}" method="post" class="modal-card__form">
+                <div class="form-field">
+                    <label class="form-field__label" for="question">Câu hỏi hoặc chủ đề cần lập kế hoạch</label>
+                    <textarea class="form-field__input" id="question" name="question" rows="4" required maxlength="1000"
+                              placeholder="Ví dụ: Nhóm 4 bạn ôn thi môn Phát triển phần mềm hướng đối tượng trong 2 giờ nên chia lộ trình như thế nào?"></textarea>
+                </div>
+                <div class="profile-actions">
+                    <button type="submit" class="btn btn--primary">Gửi trợ lý AI</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Tom tat chat thanh checklist -->
+        <section class="card profile-section">
+            <div class="profile-section__head">
+                <h2 class="profile-section__title">Tóm tắt chat thành checklist</h2>
+            </div>
+
+            <form th:action="@{/assistant/checklist}" method="post" class="modal-card__form">
+                <div class="form-field">
+                    <label class="form-field__label" for="groupName">Tên nhóm học</label>
+                    <input class="form-field__input" type="text" id="groupName" name="groupName" maxlength="100"
+                           placeholder="Ví dụ: Nhóm OOP - D22">
+                </div>
+                <div class="form-field">
+                    <label class="form-field__label" for="chatContent">Nội dung trao đổi (mỗi dòng một ý)</label>
+                    <textarea class="form-field__input" id="chatContent" name="chatContent" rows="4" required
+                              placeholder="Dán các tin nhắn bàn bạc của nhóm để AI rút trích thành checklist..."></textarea>
+                </div>
+                <div class="profile-actions">
+                    <button type="submit" class="btn btn--secondary">Tạo checklist</button>
+                </div>
+            </form>
+        </section>
+    </div>
+
+    <!-- Lich su gan day -->
+    <section class="card assistant-history">
+        <div class="profile-section__head">
+            <h2 class="profile-section__title">Lịch sử gần đây</h2>
+        </div>
+
+        <div class="empty-state" th:if="${#lists.isEmpty(history)}">
+            <p class="empty-state__title">Chưa có yêu cầu nào</p>
+            <p class="empty-state__desc">Các câu hỏi và bản tóm tắt checklist gần đây của bạn sẽ hiển thị tại đây.</p>
+        </div>
+
+        <div class="assistant-history__list" th:if="${!#lists.isEmpty(history)}">
+            <article class="assistant-history__item" th:each="item : ${history}">
+                <div class="assistant-history__meta">
+                    <span class="badge badge--primary" th:text="${item.type.label}"></span>
+                    <span class="badge badge--sm" th:if="${item.fallbackUsed}">Dự phòng</span>
+                    <span class="text-muted" th:text="${#temporals.format(item.createdAt, 'dd/MM HH:mm')}"></span>
+                </div>
+                <p class="assistant-history__prompt" th:text="${item.promptSummary}"></p>
+                <pre class="assistant-reply__text" th:text="${item.responseText}"></pre>
+            </article>
+        </div>
+    </section>
+</div>
+</body>
+</html>

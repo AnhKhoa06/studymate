@@ -11,13 +11,16 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
+import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.unauthenticated;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -251,5 +254,420 @@ class SecurityIntegrationTest {
 
         // Email duoc cat khoang trang va chuyen chu thuong
         assertThat(userRepository.findByEmail("trimmed.user@example.com")).isPresent();
+    }
+
+    @Test
+    @DisplayName("(12) Đăng nhập thật qua POST /login, GET / hiện họ tên và không chứa chuỗi hash; model không chứa password")
+    void test12_realLoginDisplaysFullNameAndNoPasswordHash() throws Exception {
+        User user = new User();
+        user.setEmail("student12@example.com");
+        user.setPasswordHash(passwordEncoder.encode("secretPass123"));
+        user.setFullName("Nguyen Van Muoi Hai");
+        user.setRole(Role.STUDENT);
+        user.setEnabled(true);
+        user.setCreatedAt(LocalDateTime.now());
+        userRepository.save(user);
+
+        var loginResult = mockMvc.perform(post("/login")
+                        .with(csrf())
+                        .param("username", "student12@example.com")
+                        .param("password", "secretPass123"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/"))
+                .andReturn();
+
+        MockHttpSession session = (MockHttpSession) loginResult.getRequest().getSession(false);
+        assertThat(session).isNotNull();
+
+        mockMvc.perform(get("/").session(session))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Nguyen Van Muoi Hai")))
+                .andExpect(content().string(not(containsString("$2"))))
+                .andExpect(model().attributeDoesNotExist("password"))
+                .andExpect(model().attributeDoesNotExist("passwordHash"));
+    }
+
+    @Test
+    @DisplayName("(13) Menu theo role: STUDENT không chứa liên kết /admin/users và /manager/*; ADMIN chứa /admin/users")
+    void test13_menuByRoleContentCheck() throws Exception {
+        User student = new User();
+        student.setEmail("student13@example.com");
+        student.setPasswordHash(passwordEncoder.encode("studentPass123"));
+        student.setFullName("Sinh Vien Muoi Ba");
+        student.setRole(Role.STUDENT);
+        student.setEnabled(true);
+        student.setCreatedAt(LocalDateTime.now());
+        userRepository.save(student);
+
+        User admin = new User();
+        admin.setEmail("admin13@example.com");
+        admin.setPasswordHash(passwordEncoder.encode("adminPass123"));
+        admin.setFullName("Quan Tri Vien Muoi Ba");
+        admin.setRole(Role.ADMIN);
+        admin.setEnabled(true);
+        admin.setCreatedAt(LocalDateTime.now());
+        userRepository.save(admin);
+
+        var studentLogin = mockMvc.perform(post("/login")
+                        .with(csrf())
+                        .param("username", "student13@example.com")
+                        .param("password", "studentPass123"))
+                .andExpect(status().is3xxRedirection())
+                .andReturn();
+        MockHttpSession studentSession = (MockHttpSession) studentLogin.getRequest().getSession(false);
+
+        String studentContent = mockMvc.perform(get("/").session(studentSession))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        assertThat(studentContent).contains("/matching");
+        assertThat(studentContent).contains("/groups");
+        assertThat(studentContent).doesNotContain("href=\"/rooms\"");
+        assertThat(studentContent).contains("/bookings");
+        assertThat(studentContent).contains("/chat");
+        assertThat(studentContent).contains("/notifications");
+        assertThat(studentContent).contains("/profile");
+        assertThat(studentContent).doesNotContain("/admin/users");
+        assertThat(studentContent).doesNotContain("/manager/");
+
+        var studentNavMatcher = Pattern.compile("<nav\\s[^>]*class=\"[^\"]*\\bnavbar__nav\\b[^\"]*\"[^>]*>.*?</nav>", Pattern.DOTALL).matcher(studentContent);
+        assertThat(studentNavMatcher.find()).isTrue();
+        String studentNav = studentNavMatcher.group();
+        assertThat(studentNav).doesNotContain("href=\"/rooms\"");
+        assertThat(studentNav).doesNotContain("/admin/users");
+        assertThat(studentNav).doesNotContain("/manager/");
+
+        var adminLogin = mockMvc.perform(post("/login")
+                        .with(csrf())
+                        .param("username", "admin13@example.com")
+                        .param("password", "adminPass123"))
+                .andExpect(status().is3xxRedirection())
+                .andReturn();
+        MockHttpSession adminSession = (MockHttpSession) adminLogin.getRequest().getSession(false);
+
+        String adminContent = mockMvc.perform(get("/").session(adminSession))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        var adminSidebarMatcher = Pattern.compile("<aside\\s[^>]*class=\"[^\"]*\\bsidebar\\b[^\"]*\"[^>]*>.*?</aside>", Pattern.DOTALL).matcher(adminContent);
+        assertThat(adminSidebarMatcher.find()).isTrue();
+        assertThat(adminSidebarMatcher.group()).contains("href=\"/admin/users\"");
+    }
+
+    @Test
+    @DisplayName("(14) Nút đăng xuất là form POST có trường _csrf, không có liên kết GET tới /logout")
+    void test14_logoutIsPostFormWithCsrfNoGetLink() throws Exception {
+        User user = new User();
+        user.setEmail("user14@example.com");
+        user.setPasswordHash(passwordEncoder.encode("userPass14"));
+        user.setFullName("User Muoi Bon");
+        user.setRole(Role.STUDENT);
+        user.setEnabled(true);
+        user.setCreatedAt(LocalDateTime.now());
+        userRepository.save(user);
+
+        var login = mockMvc.perform(post("/login")
+                        .with(csrf())
+                        .param("username", "user14@example.com")
+                        .param("password", "userPass14"))
+                .andExpect(status().is3xxRedirection())
+                .andReturn();
+        MockHttpSession session = (MockHttpSession) login.getRequest().getSession(false);
+
+        String content = mockMvc.perform(get("/").session(session))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("action=\"/logout\"")))
+                .andExpect(content().string(containsString("method=\"post\"")))
+                .andExpect(content().string(containsString("name=\"_csrf\"")))
+                .andReturn().getResponse().getContentAsString();
+
+        assertThat(content).doesNotContain("href=\"/logout\"");
+        assertThat(content).doesNotContain("href='/logout'");
+    }
+
+    @Test
+    @DisplayName("(15) Trang /login có thẻ img logo, có nút hiện/ẩn mật khẩu với aria-label, và ô password không có thuộc tính value sau khi đăng ký lỗi")
+    void test15_loginElementsAndRegisterPasswordNoValueOnError() throws Exception {
+        // Kiem tra trang /login co img logo va nut toggle password co aria-label
+        String loginContent = mockMvc.perform(get("/login"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("<img")))
+                .andExpect(content().string(containsString("logo.png")))
+                .andExpect(content().string(containsString("aria-label=\"Hiện mật khẩu\"")))
+                .andReturn().getResponse().getContentAsString();
+        assertThat(loginContent).contains("alt=\"Logo Trường Đại học Quy Nhơn\"");
+
+        // Dang ky loi (khong khop mat khau): o password khong duoc chua thuoc tinh value
+        String registerErrorContent = mockMvc.perform(post("/register")
+                        .with(csrf())
+                        .param("email", "errorpass@example.com")
+                        .param("fullName", "Error User")
+                        .param("password", "validPass123")
+                        .param("confirmPassword", "differentPass123"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        assertThat(registerErrorContent).doesNotContainPattern("id=\"password\"[^>]*value=");
+        assertThat(registerErrorContent).doesNotContainPattern("id=\"confirmPassword\"[^>]*value=");
+    }
+
+    @Test
+    @DisplayName("(16) MANAGER và ADMIN đăng nhập thật rồi vào / thấy khung staff và không thấy thanh tab dưới của sinh viên")
+    void test16_managerAndAdminRealLoginAccessHomeSeeStaffLayoutNoBottomNav() throws Exception {
+        // MANAGER dang nhap that
+        User manager = new User();
+        manager.setEmail("manager16@example.com");
+        manager.setPasswordHash(passwordEncoder.encode("managerPass16"));
+        manager.setFullName("Quan Ly Muoi Sau");
+        manager.setRole(Role.MANAGER);
+        manager.setEnabled(true);
+        manager.setCreatedAt(LocalDateTime.now());
+        userRepository.save(manager);
+
+        var managerLogin = mockMvc.perform(post("/login")
+                        .with(csrf())
+                        .param("username", "manager16@example.com")
+                        .param("password", "managerPass16"))
+                .andExpect(status().is3xxRedirection())
+                .andReturn();
+        MockHttpSession managerSession = (MockHttpSession) managerLogin.getRequest().getSession(false);
+        assertThat(managerSession).isNotNull();
+
+        String managerContent = mockMvc.perform(get("/").session(managerSession))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        assertThat(managerContent).containsPattern("<body\\s[^>]*class=\"[^\"]*\\blayout-staff\\b[^\"]*\"[^>]*>");
+        assertThat(managerContent).doesNotContainPattern("\\bcontainer-student\\b");
+        assertThat(managerContent).doesNotContainPattern("\\bnav-bottom\\b");
+        assertThat(managerContent).doesNotContain("nav-bottom__item");
+
+        // <aside nam TRUOC the <main trong HTML
+        var mgrAsideMatcher = Pattern.compile("<aside\\b[^>]*>", Pattern.CASE_INSENSITIVE).matcher(managerContent);
+        assertThat(mgrAsideMatcher.find()).isTrue();
+        int mgrAsideIndex = mgrAsideMatcher.start();
+
+        var mgrMainMatcher = Pattern.compile("<main\\b[^>]*>", Pattern.CASE_INSENSITIVE).matcher(managerContent);
+        assertThat(mgrMainMatcher.find()).isTrue();
+        int mgrMainIndex = mgrMainMatcher.start();
+
+        assertThat(mgrAsideIndex).isLessThan(mgrMainIndex);
+
+        // Sidebar manager chua cac muc chuc nang
+        var mgrSidebarMatcher = Pattern.compile("<aside\\s[^>]*class=\"[^\"]*\\bsidebar\\b[^\"]*\"[^>]*>.*?</aside>", Pattern.DOTALL).matcher(managerContent);
+        assertThat(mgrSidebarMatcher.find()).isTrue();
+        String mgrSidebar = mgrSidebarMatcher.group();
+        assertThat(mgrSidebar).contains("Quản lý phòng");
+        assertThat(mgrSidebar).contains("Duyệt đặt phòng");
+        assertThat(mgrSidebar).contains("Thống kê");
+
+        // DUNG MOT the <h1> tren toan trang
+        var mgrH1Matcher = Pattern.compile("<h1[\\s>]", Pattern.CASE_INSENSITIVE).matcher(managerContent);
+        int mgrH1Count = 0;
+        while (mgrH1Matcher.find()) mgrH1Count++;
+        assertThat(mgrH1Count).isEqualTo(1);
+
+        // ADMIN dang nhap that
+        User admin = new User();
+        admin.setEmail("admin16@example.com");
+        admin.setPasswordHash(passwordEncoder.encode("adminPass16"));
+        admin.setFullName("Admin Muoi Sau");
+        admin.setRole(Role.ADMIN);
+        admin.setEnabled(true);
+        admin.setCreatedAt(LocalDateTime.now());
+        userRepository.save(admin);
+
+        var adminLogin = mockMvc.perform(post("/login")
+                        .with(csrf())
+                        .param("username", "admin16@example.com")
+                        .param("password", "adminPass16"))
+                .andExpect(status().is3xxRedirection())
+                .andReturn();
+        MockHttpSession adminSession = (MockHttpSession) adminLogin.getRequest().getSession(false);
+        assertThat(adminSession).isNotNull();
+
+        String adminContent = mockMvc.perform(get("/").session(adminSession))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        assertThat(adminContent).containsPattern("<body\\s[^>]*class=\"[^\"]*\\blayout-staff\\b[^\"]*\"[^>]*>");
+        assertThat(adminContent).doesNotContainPattern("\\bcontainer-student\\b");
+        assertThat(adminContent).doesNotContainPattern("\\bnav-bottom\\b");
+        assertThat(adminContent).doesNotContain("nav-bottom__item");
+
+        // <aside nam TRUOC the <main trong HTML
+        var adminAsideMatcher = Pattern.compile("<aside\\b[^>]*>", Pattern.CASE_INSENSITIVE).matcher(adminContent);
+        assertThat(adminAsideMatcher.find()).isTrue();
+        int adminAsideIndex = adminAsideMatcher.start();
+
+        var adminMainMatcher = Pattern.compile("<main\\b[^>]*>", Pattern.CASE_INSENSITIVE).matcher(adminContent);
+        assertThat(adminMainMatcher.find()).isTrue();
+        int adminMainIndex = adminMainMatcher.start();
+
+        assertThat(adminAsideIndex).isLessThan(adminMainIndex);
+
+        // Sidebar admin chua muc Tai khoan
+        var adminSidebarMatcher = Pattern.compile("<aside\\s[^>]*class=\"[^\"]*\\bsidebar\\b[^\"]*\"[^>]*>.*?</aside>", Pattern.DOTALL).matcher(adminContent);
+        assertThat(adminSidebarMatcher.find()).isTrue();
+        String adminSidebar = adminSidebarMatcher.group();
+        assertThat(adminSidebar).contains("Tài khoản");
+
+        // DUNG MOT the <h1> tren toan trang
+        var adminH1Matcher = Pattern.compile("<h1[\\s>]", Pattern.CASE_INSENSITIVE).matcher(adminContent);
+        int adminH1Count = 0;
+        while (adminH1Matcher.find()) adminH1Count++;
+        assertThat(adminH1Count).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("(17) STUDENT đăng nhập: nút theme chỉ dùng icon có aria-label, kiểm tra vị trí /profile trong avatar menu, /notifications ở chuông, hàng menu không chứa hai mục đó, form đăng xuất POST CSRF")
+    void test17_studentThemeIconsAndMenuElementLocations() throws Exception {
+        User student = new User();
+        student.setEmail("student17@example.com");
+        student.setPasswordHash(passwordEncoder.encode("studentPass17"));
+        student.setFullName("Sinh Vien Muoi Bay");
+        student.setRole(Role.STUDENT);
+        student.setEnabled(true);
+        student.setCreatedAt(LocalDateTime.now());
+        userRepository.save(student);
+
+        var login = mockMvc.perform(post("/login")
+                        .with(csrf())
+                        .param("username", "student17@example.com")
+                        .param("password", "studentPass17"))
+                .andExpect(status().is3xxRedirection())
+                .andReturn();
+        MockHttpSession session = (MockHttpSession) login.getRequest().getSession(false);
+        assertThat(session).isNotNull();
+
+        String content = mockMvc.perform(get("/").session(session))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        // 1. Nut theme co aria-label, khong dung chu "Sang", "Toi", "He thong"
+        assertThat(content).contains("aria-label=\"Giao diện sáng\"");
+        assertThat(content).contains("aria-label=\"Giao diện tối\"");
+        assertThat(content).contains("aria-label=\"Theo hệ thống\"");
+        assertThat(content).doesNotContain(">Sáng<");
+        assertThat(content).doesNotContain(">Tối<");
+        assertThat(content).doesNotContain(">Hệ thống<");
+
+        // 2. Kiem tra vi tri: hang menu desktop <nav class="navbar__nav">...</nav> KHONG chua "Thong bao" va "Ho so", khong chua /rooms, khong icon
+        var navMatcher = Pattern.compile("<nav\\s[^>]*class=\"[^\"]*\\bnavbar__nav\\b[^\"]*\"[^>]*>.*?</nav>", Pattern.DOTALL).matcher(content);
+        assertThat(navMatcher.find()).isTrue();
+        String desktopMenuContent = navMatcher.group();
+        assertThat(desktopMenuContent).doesNotContain("/notifications");
+        assertThat(desktopMenuContent).doesNotContain("/profile");
+        assertThat(desktopMenuContent).doesNotContain("Thông báo");
+        assertThat(desktopMenuContent).doesNotContain("Hồ sơ");
+        assertThat(desktopMenuContent).doesNotContain("/rooms");
+        assertThat(desktopMenuContent).doesNotContain("<svg");
+        assertThat(desktopMenuContent).contains("href=\"/\"");
+        assertThat(desktopMenuContent).contains("href=\"/matching\"");
+        assertThat(desktopMenuContent).contains("href=\"/groups\"");
+        assertThat(desktopMenuContent).contains("href=\"/bookings\"");
+        assertThat(desktopMenuContent).contains("href=\"/chat\"");
+
+        // Hang menu sinh vien co dung 5 lien ket (Trang chu, Tim ban, Nhom, Dat phong, Chat)
+        var linkMatcher = Pattern.compile("<a\\s[^>]*href=\"[^\"]*\"[^>]*>", Pattern.DOTALL).matcher(desktopMenuContent);
+        int linkCount = 0;
+        while (linkMatcher.find()) linkCount++;
+        assertThat(linkCount).isEqualTo(5);
+
+        // 3. /notifications nam o nut chuong (trich ca the mo chua navbar__bell-btn)
+        var bellMatcher = Pattern.compile("<a\\s[^>]*class=\"[^\"]*\\bnavbar__bell-btn\\b[^\"]*\"[^>]*>", Pattern.DOTALL).matcher(content);
+        assertThat(bellMatcher.find()).isTrue();
+        String bellTag = bellMatcher.group();
+        assertThat(bellTag).contains("href=\"/notifications\"");
+        assertThat(bellTag).contains("aria-label=\"Thông báo\"");
+
+        // 4. /profile nam trong menu avatar (userMenuDropdown) trich bang regex
+        var headerMatcher = Pattern.compile("<header\\s[^>]*class=\"[^\"]*\\bnavbar\\b[^\"]*\"[^>]*>.*?</header>", Pattern.DOTALL).matcher(content);
+        assertThat(headerMatcher.find()).isTrue();
+        String headerContent = headerMatcher.group();
+
+        var dropdownMatcher = Pattern.compile("<div\\s[^>]*id=\"userMenuDropdown\"[^>]*>.*?</form>\\s*</div>", Pattern.DOTALL).matcher(headerContent);
+        assertThat(dropdownMatcher.find()).isTrue();
+        String userMenuContent = dropdownMatcher.group();
+
+        var profileLinkMatcher = Pattern.compile("<a\\s[^>]*href=\"/profile\"[^>]*>.*?</a>", Pattern.DOTALL).matcher(userMenuContent);
+        assertThat(profileLinkMatcher.find()).isTrue();
+        assertThat(profileLinkMatcher.group()).contains("Hồ sơ");
+
+        // 5. Cum theme nam trong menu avatar va ca o khu vuc tac vu ben ngoai dropdown
+        assertThat(userMenuContent).contains("class=\"theme-switcher\"");
+        assertThat(userMenuContent).contains("Giao diện");
+
+        String outsideDropdown = headerContent.replace(userMenuContent, "");
+        assertThat(outsideDropdown).contains("class=\"theme-switcher\"");
+
+        // 6. Form dang xuat la POST co _csrf nam trong menu avatar
+        var logoutFormMatcher = Pattern.compile("<form\\s[^>]*action=\"/logout\"[^>]*method=\"post\"[^>]*>.*?</form>", Pattern.DOTALL).matcher(userMenuContent);
+        assertThat(logoutFormMatcher.find()).isTrue();
+        assertThat(logoutFormMatcher.group()).contains("name=\"_csrf\"");
+
+        // 7. Trang chu co home-hero, dung 4 the journey-card co chua <svg, khong chua journey-card__number, khong chua chuoi cu
+        assertThat(content).contains("home-hero");
+        assertThat(content).doesNotContain("journey-card__number");
+        assertThat(content).doesNotContain("Phát triển phần mềm hướng đối tượng");
+
+        var journeyCardMatcher = Pattern.compile("<a\\s[^>]*class=\"[^\"]*\\bjourney-card\\b[^\"]*\"[^>]*>.*?</a>", Pattern.DOTALL).matcher(content);
+        int cardCount = 0;
+        while (journeyCardMatcher.find()) {
+            cardCount++;
+            String cardHtml = journeyCardMatcher.group();
+            assertThat(cardHtml).contains("<svg");
+            assertThat(cardHtml).doesNotContain("journey-card__number");
+        }
+        assertThat(cardCount).isEqualTo(4);
+
+        // 8. Thanh rail chua vach truot indicator va trang co nap navbar.js
+        var railMatcher = Pattern.compile("<div\\s[^>]*class=\"[^\"]*\\bnavbar__rail\\b[^\"]*\"[^>]*>.*?</div>", Pattern.DOTALL).matcher(content);
+        assertThat(railMatcher.find()).isTrue();
+        String railContent = railMatcher.group();
+        assertThat(railContent).contains("<span class=\"navbar__indicator\" aria-hidden=\"true\"></span>");
+        assertThat(content).contains("navbar.js");
+    }
+
+    @Test
+    @DisplayName("(18) GET /login khi chua co phien tra 200 va trang chua _csrf")
+    void test18_loginPageReturns200WithCsrf() throws Exception {
+        // LUU Y: MockMvc khong mo phong duoc viec Tomcat gui response tung phan (flush),
+        // nen test nay khong phat hien duoc loi IllegalStateException tren Tomcat thuc.
+        mockMvc.perform(get("/login"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("_csrf")));
+    }
+
+    @Test
+    @DisplayName("(19) GET /register khi chua co phien tra 200 va trang chua _csrf")
+    void test19_registerPageReturns200WithCsrf() throws Exception {
+        // LUU Y: Nhu test 18, MockMvc khong mo phong duoc flush tung phan cua Tomcat.
+        mockMvc.perform(get("/register"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("_csrf")));
+    }
+
+    @Test
+    @DisplayName("(20) GET /login trả 200, có nhãn 'Email', input name='username', và KHÔNG chứa chuỗi 'Tên đăng nhập'")
+    void test20_loginPageLabelEmailAndNoUsernameText() throws Exception {
+        String loginContent = mockMvc.perform(get("/login"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        // Trich the label for="username" co class form-field__label
+        var labelMatcher = Pattern.compile("<label\\s[^>]*for=\"username\"[^>]*>.*?</label>", Pattern.DOTALL).matcher(loginContent);
+        assertThat(labelMatcher.find()).isTrue();
+        assertThat(labelMatcher.group()).contains("form-field__label");
+        assertThat(labelMatcher.group()).contains("Email");
+
+        // Trich the input name="username"
+        var inputMatcher = Pattern.compile("<input\\s[^>]*name=\"username\"[^>]*>", Pattern.DOTALL).matcher(loginContent);
+        assertThat(inputMatcher.find()).isTrue();
+        String inputTag = inputMatcher.group();
+        assertThat(inputTag).contains("type=\"email\"");
+        assertThat(inputTag).contains("autocomplete=\"username\"");
+
+        assertThat(loginContent).doesNotContain("Tên đăng nhập");
     }
 }

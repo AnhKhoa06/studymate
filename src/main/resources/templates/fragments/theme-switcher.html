@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="themeSwitcher" class="theme-switcher" role="group" aria-label="Chủ đề giao diện">
+    <button type="button" class="theme-switcher__btn" data-theme-value="light" aria-pressed="true" aria-label="Giao diện sáng" title="Giao diện sáng">
+        <svg class="icon" aria-hidden="true"><use href="#icon-sun"/></svg>
+    </button>
+    <button type="button" class="theme-switcher__btn" data-theme-value="dark" aria-pressed="false" aria-label="Giao diện tối" title="Giao diện tối">
+        <svg class="icon" aria-hidden="true"><use href="#icon-moon"/></svg>
+    </button>
+    <button type="button" class="theme-switcher__btn" data-theme-value="system" aria-pressed="false" aria-label="Theo hệ thống" title="Theo hệ thống">
+        <svg class="icon" aria-hidden="true"><use href="#icon-desktop"/></svg>
+    </button>
+</div>
+</body>
+</html>

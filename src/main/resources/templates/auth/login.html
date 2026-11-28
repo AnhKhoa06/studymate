@@ -1,36 +1,61 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Đăng nhập - StudyMate</title>
-</head>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/auth :: layout('Đăng nhập', ~{::content})}">
 <body>
-<h1>Đăng nhập</h1>
+<div th:fragment="content" class="auth-card">
+    <h1 class="auth-card__title">ĐĂNG NHẬP</h1>
 
-<!-- Thông báo lỗi chung chung, không tiết lộ email có tồn tại hay không -->
-<div th:if="${param.error}">
-    <p>Thông tin đăng nhập không chính xác. Vui lòng thử lại.</p>
-</div>
-<div th:if="${param.logout}">
-    <p>Đã đăng xuất thành công.</p>
-</div>
-<div th:if="${param.registered}">
-    <p>Đăng ký thành công. Vui lòng đăng nhập.</p>
-</div>
-
-<form th:action="@{/login}" method="post">
-    <!-- CSRF tự động thêm bởi Thymeleaf khi dùng th:action -->
-    <div>
-        <label for="username">Email</label>
-        <input type="email" id="username" name="username" required autofocus>
+    <!-- Thong bao co dinh theo quy uoc, khong doi text vi test kiem tra dung cau nay -->
+    <div th:if="${param.error}" class="alert alert--error" role="alert">
+        <svg class="icon alert__icon" aria-hidden="true"><use href="#icon-warning"/></svg>
+        <span>Thông tin đăng nhập không chính xác. Vui lòng thử lại.</span>
     </div>
-    <div>
-        <label for="password">Mật khẩu</label>
-        <input type="password" id="password" name="password" required>
+    <div th:if="${param.locked}" class="alert alert--error" role="alert">
+        <svg class="icon alert__icon" aria-hidden="true"><use href="#icon-warning"/></svg>
+        <span>Tài khoản tạm thời bị khóa do đăng nhập sai nhiều lần. Vui lòng thử lại sau 15 phút hoặc đặt lại mật khẩu.</span>
     </div>
-    <button type="submit">Đăng nhập</button>
-</form>
+    <div th:if="${param.logout}" class="alert alert--success" role="status">
+        <svg class="icon alert__icon" aria-hidden="true"><use href="#icon-check"/></svg>
+        <span>Đã đăng xuất thành công.</span>
+    </div>
+    <div th:if="${param.registered}" class="alert alert--success" role="status">
+        <svg class="icon alert__icon" aria-hidden="true"><use href="#icon-check"/></svg>
+        <span>Đăng ký thành công. Vui lòng đăng nhập.</span>
+    </div>
+    <div th:if="${param.reset}" class="alert alert--success" role="status">
+        <svg class="icon alert__icon" aria-hidden="true"><use href="#icon-check"/></svg>
+        <span>Đặt lại mật khẩu thành công. Vui lòng đăng nhập.</span>
+    </div>
 
-<p><a th:href="@{/register}">Chưa có tài khoản? Đăng ký</a></p>
+    <form th:action="@{/login}" method="post" class="auth-form">
+        <div class="form-field">
+            <label class="form-field__label" for="username">Email</label>
+            <input class="form-field__input" type="email" id="username" name="username"
+                   required autofocus autocomplete="username" placeholder="email@example.com"
+                   aria-label="Email">
+        </div>
+
+        <div class="form-field">
+            <div class="form-field__label-row">
+                <label class="form-field__label" for="password">Mật khẩu</label>
+                <a th:href="@{/forgot-password}" class="auth-card__forgot">Quên mật khẩu?</a>
+            </div>
+            <div class="input-wrapper">
+                <input class="form-field__input input-with-toggle" type="password" id="password" name="password" required placeholder="Nhập mật khẩu">
+                <button type="button" class="btn-toggle-password" aria-label="Hiện mật khẩu" aria-pressed="false" title="Hiện mật khẩu">
+                    <svg class="icon icon-eye-show" aria-hidden="true"><use href="#icon-eye"/></svg>
+                    <svg class="icon icon-eye-hide" aria-hidden="true" style="display:none;"><use href="#icon-eye-slash"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn--primary btn--block">Đăng nhập</button>
+    </form>
+
+    <p class="auth-card__switch">
+        <span>Chưa có tài khoản?</span>
+        <a th:href="@{/register}" class="auth-card__switch-link">Đăng ký ngay</a>
+    </p>
+</div>
 </body>
 </html>

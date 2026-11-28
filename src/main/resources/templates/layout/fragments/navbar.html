@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Thanh header cho sinh vien (desktop va mobile) -->
+<header th:fragment="studentNavbar" class="navbar navbar--student">
+    <div class="container-student">
+        <!-- Logo du an StudyMate -->
+        <a th:href="@{/}" class="navbar__brand" aria-label="StudyMate Trang chủ">
+            <svg class="navbar__brand-logo" aria-hidden="true"><use href="#icon-brand"/></svg>
+            <span class="navbar__brand-text">StudyMate</span>
+        </a>
+
+        <!-- Khung nen boc hang menu dang vien thuoc (cach logo 32px) -->
+        <div class="navbar__rail">
+            <span class="navbar__indicator" aria-hidden="true"></span>
+            <nav class="navbar__nav" aria-label="Điều hướng chính">
+                <ul class="navbar__menu">
+                    <li th:each="item : ${menuItems}" th:if="${item.showOnDesktop}">
+                        <a th:href="@{${item.url}}"
+                           class="navbar__link"
+                           th:text="${item.label}"
+                           th:attr="aria-current=${item.active ? 'page' : null}">
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <div class="navbar__actions">
+            <!-- Thong bao (icon chuong tron 44x44) — khong cham bao khi chua co so chua doc -->
+            <a th:href="@{/notifications}" class="navbar__action-btn navbar__bell-btn" aria-label="Thông báo" title="Thông báo">
+                <svg class="icon" aria-hidden="true"><use href="#icon-bell"/></svg>
+                <span th:if="${unreadCount != null and unreadCount > 0}" class="navbar__bell-badge" aria-hidden="true"></span>
+            </a>
+
+            <!-- Cum 3 nut theme tren thanh tren (hien tu 1024px tro len) -->
+            <div class="navbar__theme-desktop">
+                <div th:replace="~{fragments/theme-switcher :: themeSwitcher}"></div>
+            </div>
+
+            <!-- Avatar dang vien thuoc + menu dropdown -->
+            <div class="user-menu" th:if="${currentUser != null}">
+                <button type="button" class="user-menu__btn user-menu__btn--pill" id="userMenuBtn"
+                        aria-expanded="false" aria-label="Menu tài khoản" title="Menu tài khoản">
+                    <span class="avatar avatar--sm" aria-hidden="true"
+                          th:text="${#strings.toUpperCase(#strings.substring(currentUser.fullName, 0, 1))}">U</span>
+                    <span class="user-menu__name" th:text="${currentUser.fullName}"></span>
+                    <svg class="icon icon--xs user-menu__chevron" aria-hidden="true"><use href="#icon-chevron-down"/></svg>
+                </button>
+
+                <div class="user-menu__dropdown" id="userMenuDropdown" hidden>
+                    <!-- Ho ten va huy hieu vai tro -->
+                    <div class="user-menu__header">
+                        <p class="user-menu__name-full" th:text="${currentUser.fullName}"></p>
+                        <span class="badge badge--sm"
+                              th:text="${currentRole == 'ADMIN' ? 'Quản trị viên' : (currentRole == 'MANAGER' ? 'Quản lý' : 'Sinh viên')}"></span>
+                    </div>
+
+                    <a th:href="@{/profile}" class="user-menu__link">
+                        <svg class="icon user-menu__icon" aria-hidden="true"><use href="#icon-user-circle"/></svg>
+                        <span>Hồ sơ</span>
+                    </a>
+
+                    <!-- Nhom giao dien: label + cum 3 nut theme (hien thi duoi 1024px, an tu 1024px) -->
+                    <div class="user-menu__theme-group">
+                        <span class="user-menu__theme-label">Giao diện</span>
+                        <div th:replace="~{fragments/theme-switcher :: themeSwitcher}"></div>
+                    </div>
+
+                    <hr class="user-menu__divider">
+
+                    <!-- Dang xuat bang form POST (co CSRF) -->
+                    <form th:action="@{/logout}" method="post" class="user-menu__logout-form">
+                        <button type="submit" class="user-menu__link user-menu__link--danger">
+                            <svg class="icon user-menu__icon" aria-hidden="true"><use href="#icon-logout"/></svg>
+                            <span>Đăng xuất</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Thanh tab duoi cho sinh vien tren mobile -->
+<nav th:fragment="studentBottomNav" class="nav-bottom" aria-label="Điều hướng chính">
+    <th:block th:each="item : ${menuItems}" th:if="${item.showOnMobileBottom}">
+        <a th:href="@{${item.url}}"
+           class="nav-bottom__item"
+           th:attr="aria-label=${item.label},aria-current=${item.active ? 'page' : null}">
+            <svg class="nav-bottom__icon" aria-hidden="true"><use th:href="'#icon-' + ${item.icon}"/></svg>
+            <span th:text="${item.label}"></span>
+        </a>
+    </th:block>
+</nav>
+
+<!-- Cum hanh dong goc phai dung chung (theme + menu tai khoan) -->
+<div th:fragment="userAccountActions" class="navbar__actions">
+    <!-- Cum 3 nut theme tren thanh tren (hien tu 1024px tro len) -->
+    <div class="navbar__theme-desktop">
+        <div th:replace="~{fragments/theme-switcher :: themeSwitcher}"></div>
+    </div>
+
+    <!-- Avatar dang vien thuoc + menu dropdown -->
+    <div class="user-menu" th:if="${currentUser != null}">
+        <button type="button" class="user-menu__btn user-menu__btn--pill" id="userMenuBtn"
+                aria-expanded="false" aria-label="Menu tài khoản" title="Menu tài khoản">
+            <span class="avatar avatar--sm" aria-hidden="true"
+                  th:text="${#strings.toUpperCase(#strings.substring(currentUser.fullName, 0, 1))}">U</span>
+            <span class="user-menu__name" th:text="${currentUser.fullName}"></span>
+            <svg class="icon icon--xs user-menu__chevron" aria-hidden="true"><use href="#icon-chevron-down"/></svg>
+        </button>
+
+        <div class="user-menu__dropdown" id="userMenuDropdown" hidden>
+            <!-- Ho ten va huy hieu vai tro -->
+            <div class="user-menu__header">
+                <p class="user-menu__name-full" th:text="${currentUser.fullName}"></p>
+                <span class="badge badge--sm"
+                      th:text="${currentRole == 'ADMIN' ? 'Quản trị viên' : (currentRole == 'MANAGER' ? 'Quản lý' : 'Sinh viên')}"></span>
+            </div>
+
+            <a th:href="@{/profile}" class="user-menu__link">
+                <svg class="icon user-menu__icon" aria-hidden="true"><use href="#icon-user-circle"/></svg>
+                <span>Hồ sơ</span>
+            </a>
+
+            <!-- Nhom giao dien: label + cum 3 nut theme (hien thi duoi 1024px, an tu 1024px) -->
+            <div class="user-menu__theme-group">
+                <span class="user-menu__theme-label">Giao diện</span>
+                <div th:replace="~{fragments/theme-switcher :: themeSwitcher}"></div>
+            </div>
+
+            <hr class="user-menu__divider">
+
+            <!-- Dang xuat bang form POST (co CSRF) -->
+            <form th:action="@{/logout}" method="post" class="user-menu__logout-form">
+                <button type="submit" class="user-menu__link user-menu__link--danger">
+                    <svg class="icon user-menu__icon" aria-hidden="true"><use href="#icon-logout"/></svg>
+                    <span>Đăng xuất</span>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Cum hanh dong cho topbar cua quan ly va admin -->
+<div th:fragment="staffHeaderActions" th:replace="~{layout/fragments/navbar :: userAccountActions}"></div>
+
+<!-- Thanh sidebar cho quan ly va admin -->
+<aside th:fragment="staffSidebar" class="sidebar" id="staffSidebar">
+    <a th:href="@{/}" class="sidebar__brand" aria-label="StudyMate Trang chủ">
+        <svg class="sidebar__brand-logo" aria-hidden="true"><use href="#icon-brand"/></svg>
+        <span class="sidebar__brand-text">StudyMate</span>
+    </a>
+
+    <ul class="sidebar__menu">
+        <li th:each="item : ${menuItems}">
+            <a th:href="@{${item.url}}" class="sidebar__link"
+               th:attr="aria-label=${item.label},aria-current=${item.active ? 'page' : null}">
+                <svg class="icon sidebar__link-icon" aria-hidden="true"><use th:href="'#icon-' + ${item.icon}"/></svg>
+                <span th:text="${item.label}"></span>
+            </a>
+        </li>
+    </ul>
+</aside>
+
+</body>
+</html>

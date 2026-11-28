@@ -1,18 +1,219 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Trang chủ - StudyMate</title>
-</head>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="${currentRole == 'MANAGER' or currentRole == 'ADMIN'} ? ~{layout/staff :: layout('Trang chủ', ~{::content})} : ~{layout/student :: layout('Trang chủ', ~{::content})}">
 <body>
-<h1>StudyMate</h1>
+<div th:fragment="content">
+    <!-- Giao dien cho STUDENT -->
+    <th:block th:if="${currentRole == 'STUDENT' or currentRole == null}">
+        <!-- Banner chao sinh vien -->
+        <div class="home-hero">
+            <span class="home-hero__greeting">XIN CHÀO</span>
+            <div class="home-hero__header">
+                <h1 class="home-hero__title" th:text="${fullName != null ? fullName : 'Sinh viên'}">Sinh viên</h1>
+                <span class="badge badge--surface">Sinh viên</span>
+            </div>
+            <p class="home-hero__tagline">Tìm bạn học, lập nhóm và giữ phòng học trong một nơi.</p>
+            <div class="home-hero__actions">
+                <a th:href="@{/matching}" class="btn btn--hero-primary">
+                    <svg class="icon" aria-hidden="true"><use href="#icon-magnifying-glass"/></svg>
+                    <span>Tìm bạn học</span>
+                </a>
+                <a th:href="@{/bookings}" class="btn btn--hero-secondary">
+                    <svg class="icon" aria-hidden="true"><use href="#icon-calendar-blank"/></svg>
+                    <span>Đặt phòng</span>
+                </a>
+                <a th:href="@{/assistant}" class="btn btn--hero-secondary">
+                    <svg class="icon" aria-hidden="true"><use href="#icon-sparkles"/></svg>
+                    <span>Trợ lý AI</span>
+                </a>
+            </div>
+        </div>
 
-<!-- Hiển thị tên và role bằng th:text, không đưa dữ liệu thô chưa escape ra view -->
-<p>Xin chào, <span th:text="${email}"></span></p>
-<p>Vai trò: <span th:text="${role}"></span></p>
+        <!-- Hanh trinh hoc nhom dang the phieu (ticket) -->
+        <section class="journey-section">
+            <h2 class="journey-section__title">Hành trình học nhóm</h2>
+            <div class="journey-grid">
+                <!-- 1. Tim ban hoc -->
+                <a th:href="@{/matching}" class="ticket journey-card">
+                    <div class="ticket__body journey-card__body">
+                        <div class="journey-card__icon-box">
+                            <svg class="icon" aria-hidden="true"><use href="#icon-magnifying-glass"/></svg>
+                        </div>
+                        <h3 class="journey-card__title">Tìm bạn học</h3>
+                        <p class="journey-card__desc">Tìm kiếm bạn học phù hợp theo môn học và thời khóa biểu</p>
+                    </div>
+                    <div class="ticket__stub journey-card__stub">
+                        <span class="journey-card__action">
+                            <span>Bắt đầu</span>
+                            <svg class="icon icon--xs" aria-hidden="true"><use href="#icon-caret-right"/></svg>
+                        </span>
+                    </div>
+                </a>
 
-<form th:action="@{/logout}" method="post">
-    <button type="submit">Đăng xuất</button>
-</form>
+                <!-- 2. Lap nhom -->
+                <a th:href="@{/groups}" class="ticket journey-card">
+                    <div class="ticket__body journey-card__body">
+                        <div class="journey-card__icon-box">
+                            <svg class="icon" aria-hidden="true"><use href="#icon-users"/></svg>
+                        </div>
+                        <h3 class="journey-card__title">Lập nhóm</h3>
+                        <p class="journey-card__desc">Tạo nhóm học mới hoặc tham gia nhóm học cùng mục tiêu</p>
+                    </div>
+                    <div class="ticket__stub journey-card__stub">
+                        <span class="journey-card__action">
+                            <span>Bắt đầu</span>
+                            <svg class="icon icon--xs" aria-hidden="true"><use href="#icon-caret-right"/></svg>
+                        </span>
+                    </div>
+                </a>
+
+                <!-- 3. Chot gio ranh chung -->
+                <a th:href="@{/groups}" class="ticket journey-card">
+                    <div class="ticket__body journey-card__body">
+                        <div class="journey-card__icon-box">
+                            <svg class="icon" aria-hidden="true"><use href="#icon-clock"/></svg>
+                        </div>
+                        <h3 class="journey-card__title">Chốt giờ rảnh chung</h3>
+                        <p class="journey-card__desc">Đối chiếu lịch trống của các thành viên để chọn thời gian họp</p>
+                    </div>
+                    <div class="ticket__stub journey-card__stub">
+                        <span class="journey-card__action">
+                            <span>Bắt đầu</span>
+                            <svg class="icon icon--xs" aria-hidden="true"><use href="#icon-caret-right"/></svg>
+                        </span>
+                    </div>
+                </a>
+
+                <!-- 4. Dat phong -->
+                <a th:href="@{/bookings}" class="ticket journey-card">
+                    <div class="ticket__body journey-card__body">
+                        <div class="journey-card__icon-box">
+                            <svg class="icon" aria-hidden="true"><use href="#icon-calendar-blank"/></svg>
+                        </div>
+                        <h3 class="journey-card__title">Đặt phòng</h3>
+                        <p class="journey-card__desc">Tra cứu phòng học trống trong trường và đăng ký sử dụng</p>
+                    </div>
+                    <div class="ticket__stub journey-card__stub">
+                        <span class="journey-card__action">
+                            <span>Bắt đầu</span>
+                            <svg class="icon icon--xs" aria-hidden="true"><use href="#icon-caret-right"/></svg>
+                        </span>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- Hang 2 cot: Lich sap toi & Thong bao gan day -->
+        <div class="home-dual-grid">
+            <div class="card empty-card">
+                <h3 class="empty-card__heading">Lịch sắp tới</h3>
+                <div class="empty-state">
+                    <svg class="icon empty-state__icon" aria-hidden="true"><use href="#icon-calendar-blank"/></svg>
+                    <p class="empty-state__title">Chưa có buổi học nào</p>
+                    <p class="empty-state__desc">Lịch họp nhóm và phòng học đã đặt sẽ xuất hiện tại đây.</p>
+                    <!-- dữ liệu do module Nhóm và Phòng cung cấp sau -->
+                </div>
+            </div>
+
+            <div class="card empty-card">
+                <h3 class="empty-card__heading">Thông báo gần đây</h3>
+                <div class="empty-state">
+                    <svg class="icon empty-state__icon" aria-hidden="true"><use href="#icon-bell"/></svg>
+                    <p class="empty-state__title">Chưa có thông báo mới</p>
+                    <p class="empty-state__desc">Lời mời vào nhóm và trạng thái đặt phòng sẽ hiển thị ở đây.</p>
+                    <!-- dữ liệu do module Nhóm và Phòng cung cấp sau -->
+                </div>
+            </div>
+        </div>
+    </th:block>
+
+    <!-- Giao dien cho MANAGER / ADMIN -->
+    <th:block th:if="${currentRole == 'MANAGER' or currentRole == 'ADMIN'}">
+        <div class="welcome-card card">
+            <div class="welcome-card__avatar">
+                <span class="avatar avatar--lg" aria-hidden="true" th:text="${fullName != null ? #strings.toUpperCase(#strings.substring(fullName, 0, 1)) : 'U'}">U</span>
+            </div>
+            <div class="welcome-card__info">
+                <div class="welcome-card__title-row">
+                    <p class="welcome-card__title">Xin chào, <span th:text="${fullName}"></span></p>
+                    <span class="badge badge--accent" th:text="${currentRole == 'ADMIN' ? 'Quản trị viên' : 'Quản lý'}"></span>
+                </div>
+                <p class="welcome-card__subtitle"
+                   th:text="${currentRole == 'ADMIN' ? 'Quản lý tài khoản, phân quyền và theo dõi vận hành hệ thống.' : 'Theo dõi phòng học, phê duyệt yêu cầu đặt phòng và xem thống kê sử dụng.'}"></p>
+            </div>
+        </div>
+
+        <section class="journey-section">
+            <h2 class="journey-section__title" th:text="${currentRole == 'MANAGER' ? 'Khu vực quản lý phòng học' : 'Khu vực quản trị hệ thống'}">Khu vực quản trị & vận hành</h2>
+            <div class="journey-grid journey-grid--staff">
+                <th:block th:if="${currentRole == 'MANAGER'}">
+                    <a th:href="@{/manager/rooms}" class="journey-card journey-card--staff">
+                        <div class="journey-card__icon-box">
+                            <svg class="icon" aria-hidden="true"><use href="#icon-door"/></svg>
+                        </div>
+                        <div class="journey-card__body">
+                            <h3 class="journey-card__title">Quản lý phòng</h3>
+                            <p class="journey-card__desc">Danh sách và thiết lập trạng thái các phòng học</p>
+                        </div>
+                        <div class="journey-card__footer">
+                            <span class="journey-card__action">
+                                <span>Truy cập</span>
+                                <svg class="icon icon--xs" aria-hidden="true"><use href="#icon-caret-right"/></svg>
+                            </span>
+                        </div>
+                    </a>
+                    <a th:href="@{/manager/bookings}" class="journey-card journey-card--staff">
+                        <div class="journey-card__icon-box">
+                            <svg class="icon" aria-hidden="true"><use href="#icon-check"/></svg>
+                        </div>
+                        <div class="journey-card__body">
+                            <h3 class="journey-card__title">Duyệt đặt phòng</h3>
+                            <p class="journey-card__desc">Kiểm tra và phê duyệt yêu cầu đặt phòng của sinh viên</p>
+                        </div>
+                        <div class="journey-card__footer">
+                            <span class="journey-card__action">
+                                <span>Truy cập</span>
+                                <svg class="icon icon--xs" aria-hidden="true"><use href="#icon-caret-right"/></svg>
+                            </span>
+                        </div>
+                    </a>
+                    <a th:href="@{/manager/dashboard}" class="journey-card journey-card--staff">
+                        <div class="journey-card__icon-box">
+                            <svg class="icon" aria-hidden="true"><use href="#icon-chart"/></svg>
+                        </div>
+                        <div class="journey-card__body">
+                            <h3 class="journey-card__title">Thống kê</h3>
+                            <p class="journey-card__desc">Báo cáo mật độ sử dụng phòng và hoạt động học nhóm</p>
+                        </div>
+                        <div class="journey-card__footer">
+                            <span class="journey-card__action">
+                                <span>Truy cập</span>
+                                <svg class="icon icon--xs" aria-hidden="true"><use href="#icon-caret-right"/></svg>
+                            </span>
+                        </div>
+                    </a>
+                </th:block>
+
+                <th:block th:if="${currentRole == 'ADMIN'}">
+                    <a th:href="@{/admin/users}" class="journey-card journey-card--staff">
+                        <div class="journey-card__icon-box">
+                            <svg class="icon" aria-hidden="true"><use href="#icon-shield"/></svg>
+                        </div>
+                        <div class="journey-card__body">
+                            <h3 class="journey-card__title">Quản lý tài khoản</h3>
+                            <p class="journey-card__desc">Phân quyền, kích hoạt và quản lý người dùng hệ thống</p>
+                        </div>
+                        <div class="journey-card__footer">
+                            <span class="journey-card__action">
+                                <span>Truy cập</span>
+                                <svg class="icon icon--xs" aria-hidden="true"><use href="#icon-caret-right"/></svg>
+                            </span>
+                        </div>
+                    </a>
+                </th:block>
+            </div>
+        </section>
+    </th:block>
+</div>
 </body>
 </html>

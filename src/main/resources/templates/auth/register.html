@@ -1,43 +1,70 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Đăng ký - StudyMate</title>
-</head>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/auth :: layout('Đăng ký tài khoản', ~{::content})}">
 <body>
-<h1>Đăng ký tài khoản</h1>
+<div th:fragment="content" class="auth-card">
+    <h1 class="auth-card__title">ĐĂNG KÝ TÀI KHOẢN</h1>
 
-<form th:action="@{/register}" th:object="${registerRequest}" method="post">
-    <!-- CSRF tự động thêm bởi Thymeleaf khi dùng th:action -->
+    <form th:action="@{/register}" th:object="${registerRequest}" method="post" class="auth-form">
+        <div class="form-field">
+            <label class="form-field__label" for="email">Email</label>
+            <input class="form-field__input" type="email" id="email" th:field="*{email}"
+                   th:aria-invalid="${#fields.hasErrors('email')}" required placeholder="student@example.com">
+            <span class="form-field__error" th:if="${#fields.hasErrors('email')}">
+                <svg class="icon" aria-hidden="true"><use href="#icon-warning"/></svg>
+                <span th:text="${#fields.errors('email')[0]}"></span>
+            </span>
+        </div>
 
-    <div>
-        <label for="email">Email</label>
-        <input type="email" id="email" th:field="*{email}" required>
-        <!-- Hiển thị lỗi validation từng trường, dùng th:text để tránh XSS -->
-        <span th:if="${#fields.hasErrors('email')}" th:text="${#fields.errors('email')[0]}"></span>
-    </div>
+        <div class="form-field">
+            <label class="form-field__label" for="fullName">Họ và tên</label>
+            <input class="form-field__input" type="text" id="fullName" th:field="*{fullName}"
+                   th:aria-invalid="${#fields.hasErrors('fullName')}" required maxlength="100" placeholder="Nguyễn Văn A">
+            <span class="form-field__error" th:if="${#fields.hasErrors('fullName')}">
+                <svg class="icon" aria-hidden="true"><use href="#icon-warning"/></svg>
+                <span th:text="${#fields.errors('fullName')[0]}"></span>
+            </span>
+        </div>
 
-    <div>
-        <label for="fullName">Họ và tên</label>
-        <input type="text" id="fullName" th:field="*{fullName}" required maxlength="100">
-        <span th:if="${#fields.hasErrors('fullName')}" th:text="${#fields.errors('fullName')[0]}"></span>
-    </div>
+        <div class="form-field">
+            <label class="form-field__label" for="password">Mật khẩu</label>
+            <!-- Khong dung th:field de tranh dien lai mat khau khi loi -->
+            <div class="input-wrapper">
+                <input class="form-field__input input-with-toggle" type="password" id="password" name="password"
+                       th:aria-invalid="${#fields.hasErrors('password')}" required minlength="8" placeholder="Tối thiểu 8 ký tự">
+                <button type="button" class="btn-toggle-password" aria-label="Hiện mật khẩu" aria-pressed="false" title="Hiện mật khẩu">
+                    <svg class="icon icon-eye-show" aria-hidden="true"><use href="#icon-eye"/></svg>
+                    <svg class="icon icon-eye-hide" aria-hidden="true" style="display:none;"><use href="#icon-eye-slash"/></svg>
+                </button>
+            </div>
+            <span class="form-field__error" th:if="${#fields.hasErrors('password')}">
+                <svg class="icon" aria-hidden="true"><use href="#icon-warning"/></svg>
+                <span th:text="${#fields.errors('password')[0]}"></span>
+            </span>
+        </div>
 
-    <div>
-        <label for="password">Mật khẩu</label>
-        <input type="password" id="password" th:field="*{password}" required minlength="8">
-        <span th:if="${#fields.hasErrors('password')}" th:text="${#fields.errors('password')[0]}"></span>
-    </div>
+        <div class="form-field">
+            <label class="form-field__label" for="confirmPassword">Nhập lại mật khẩu</label>
+            <div class="input-wrapper">
+                <input class="form-field__input input-with-toggle" type="password" id="confirmPassword" name="confirmPassword"
+                       th:aria-invalid="${#fields.hasErrors('confirmPassword')}" required placeholder="Nhập lại mật khẩu trên">
+                <button type="button" class="btn-toggle-password" aria-label="Hiện mật khẩu" aria-pressed="false" title="Hiện mật khẩu">
+                    <svg class="icon icon-eye-show" aria-hidden="true"><use href="#icon-eye"/></svg>
+                    <svg class="icon icon-eye-hide" aria-hidden="true" style="display:none;"><use href="#icon-eye-slash"/></svg>
+                </button>
+            </div>
+            <span class="form-field__error" th:if="${#fields.hasErrors('confirmPassword')}">
+                <svg class="icon" aria-hidden="true"><use href="#icon-warning"/></svg>
+                <span th:text="${#fields.errors('confirmPassword')[0]}"></span>
+            </span>
+        </div>
 
-    <div>
-        <label for="confirmPassword">Nhập lại mật khẩu</label>
-        <input type="password" id="confirmPassword" th:field="*{confirmPassword}" required>
-        <span th:if="${#fields.hasErrors('confirmPassword')}" th:text="${#fields.errors('confirmPassword')[0]}"></span>
-    </div>
+        <button type="submit" class="btn btn--primary btn--block">Đăng ký</button>
+    </form>
 
-    <button type="submit">Đăng ký</button>
-</form>
-
-<p><a th:href="@{/login}">Đã có tài khoản? Đăng nhập</a></p>
+    <p class="auth-card__switch">
+        <a th:href="@{/login}">Đã có tài khoản? Đăng nhập</a>
+    </p>
+</div>
 </body>
 </html>

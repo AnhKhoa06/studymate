@@ -1,5 +1,6 @@
 package com.studymate.user.service;
 
+import com.studymate.common.security.CurrentUser;
 import com.studymate.user.entity.User;
 import com.studymate.user.repository.UserRepository;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -35,14 +36,16 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 new SimpleGrantedAuthority("ROLE_" + user.getRole().name())
         );
 
-        // Dung UserDetails cua Spring Security; enabled=false se bi chặn dang nhap
-        return new org.springframework.security.core.userdetails.User(
+        // Tra ve CurrentUser ke thua org.springframework.security.core.userdetails.User
+        // enabled=false se bi chan dang nhap
+        return new CurrentUser(
+                user.getId(),
                 user.getEmail(),
                 user.getPasswordHash(),
-                user.isEnabled(),   // enabled
-                true,               // accountNonExpired
-                true,               // credentialsNonExpired
-                true,               // accountNonLocked
+                user.getFullName(),
+                user.getRole(),
+                user.isEnabled(),
+                !user.isTemporarilyLocked(),
                 authorities
         );
     }
