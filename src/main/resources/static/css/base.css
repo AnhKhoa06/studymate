@@ -8,6 +8,10 @@
   padding: 0;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 body {
   font-family: var(--font-sans);
   font-size: var(--text-base);
@@ -52,6 +56,91 @@ a:hover {
 }
 
 /* ============================================================
+   ICON & AVATAR & HUY HIEU (BADGE)
+   ============================================================ */
+.icon {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  stroke-width: 1.5;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.icon--xs {
+  width: 14px;
+  height: 14px;
+}
+
+.icon--sm {
+  width: 16px;
+  height: 16px;
+}
+
+.icon--lg {
+  width: 24px;
+  height: 24px;
+}
+
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  background: var(--primary-soft, var(--surface));
+  color: var(--primary);
+  font-weight: var(--weight-bold);
+  user-select: none;
+  border: var(--border-width) solid transparent;
+  flex-shrink: 0;
+}
+
+.avatar--sm {
+  width: 34px;
+  height: 34px;
+  font-size: var(--text-sm);
+}
+
+.avatar--lg {
+  width: 56px;
+  height: 56px;
+  font-size: var(--text-xl);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px var(--space-2);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  border-radius: var(--radius-sm);
+  line-height: var(--leading-tight);
+}
+
+.badge--sm {
+  font-size: 11px;
+  padding: 1px 6px;
+}
+
+.badge--primary {
+  background: var(--surface);
+  color: var(--primary);
+  border: var(--border-width) solid var(--border-light);
+}
+
+.badge--accent {
+  background: #ffedd5;
+  color: var(--accent);
+  border: var(--border-width) solid #fdba74;
+}
+
+[data-theme="dark"] .badge--accent {
+  background: #431407;
+  color: #fdba74;
+  border-color: #9a3412;
+}
+
+/* ============================================================
    KHUNG SINH VIEN (layout-student)
    ============================================================ */
 .layout-student {
@@ -61,19 +150,24 @@ a:hover {
   min-height: 100dvh;
 }
 
-.layout-student__main {
-  flex: 1;
+/* Container dung chung cho khung sinh vien de thang hang mep tren duoi */
+.container-student {
   width: 100%;
   max-width: var(--content-max-student);
   margin-inline: auto;
-  padding: var(--space-4);
+  padding-inline: var(--space-4);
+  box-sizing: border-box;
+}
+
+.layout-student__main {
+  flex: 1;
+  padding-block: var(--space-4);
   padding-bottom: calc(var(--nav-bottom-height) + var(--space-4));
 }
 
 @media (min-width: 768px) {
   .layout-student__main {
-    padding: var(--space-6) var(--space-4);
-    padding-bottom: var(--space-8);
+    padding-block: var(--space-6) var(--space-8);
   }
 }
 
@@ -107,28 +201,110 @@ a:hover {
 @media (min-width: 768px) {
   .layout-staff {
     display: grid;
-    grid-template-columns: 240px 1fr;
+    grid-template-columns: 240px minmax(0, 1fr);
     min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  .layout-staff > aside.sidebar {
+    grid-column: 1;
+    position: sticky;
+    top: 0;
+    height: 100dvh;
+    overflow-y: auto;
+    width: 240px;
+  }
+
+  .layout-staff > .layout-staff__wrapper {
+    grid-column: 2;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
     min-height: 100dvh;
   }
 }
 
 .sidebar {
-  background: var(--surface);
+  background: var(--surface-raised);
   border-right: var(--border-width) solid var(--border-light);
   display: flex;
   flex-direction: column;
-  padding: var(--space-4);
-  gap: var(--space-4);
+  padding: 0 var(--space-3) var(--space-4);
+  gap: var(--space-3);
+}
+
+@media (max-width: 767px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 260px;
+    background: var(--surface);
+    z-index: 1000;
+    transform: translateX(-100%);
+    transition: transform var(--duration-base) var(--easing-std);
+    box-shadow: var(--shadow-md);
+  }
+
+  .sidebar.is-open {
+    transform: translateX(0);
+  }
+
+  .sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 999;
+  }
+
+  .sidebar-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: transparent;
+    border: var(--border-width) solid var(--border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    color: var(--text);
+  }
+}
+
+@media (min-width: 768px) {
+  .sidebar-toggle {
+    display: none;
+  }
+  .sidebar-backdrop {
+    display: none !important;
+  }
 }
 
 .sidebar__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  text-decoration: none;
+  height: 64px;
+  padding-inline: var(--space-2);
+  border-bottom: var(--border-width) solid var(--border-light);
+  margin-bottom: var(--space-1);
+}
+
+.sidebar__brand-logo {
+  width: 46px;
+  height: 46px;
+  color: var(--primary);
+  flex-shrink: 0;
+  display: block;
+}
+
+.sidebar__brand-text {
   font-size: var(--text-lg);
   font-weight: var(--weight-bold);
-  color: var(--primary);
-  text-decoration: none;
-  padding-bottom: var(--space-3);
-  border-bottom: var(--border-width) solid var(--border-light);
+  letter-spacing: -0.02em;
+  color: var(--text);
 }
 
 .sidebar__menu {
@@ -143,20 +319,35 @@ a:hover {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  font-size: var(--text-base);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-sm);
   font-weight: var(--weight-medium);
-  color: var(--text);
+  color: var(--text-muted);
   text-decoration: none;
   border-radius: var(--radius-md);
-  transition: background var(--duration-fast) var(--easing-std);
+  min-height: 42px;
+  transition: background var(--duration-fast) var(--easing-std), color var(--duration-fast) var(--easing-std);
 }
 
 .sidebar__link:hover {
-  background: var(--overlay);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.sidebar__link[aria-current="page"] {
+  background: var(--primary-soft, var(--overlay));
+  color: var(--primary);
+  font-weight: var(--weight-semibold);
+}
+
+.sidebar__link-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
 }
 
 .sidebar__footer {
+  margin-top: auto;
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
@@ -164,10 +355,85 @@ a:hover {
   border-top: var(--border-width) solid var(--border-light);
 }
 
+.sidebar__theme {
+  display: inline-flex;
+  width: fit-content;
+}
+
+.sidebar__user {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.sidebar__user-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.sidebar__user-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.sidebar__user-name {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.layout-staff__wrapper {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 100dvh;
+}
+
+.layout-staff__header {
+  height: 64px;
+  padding-inline: var(--space-4);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  background: var(--surface-raised);
+  border-bottom: var(--border-width) solid var(--border-light);
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+.layout-staff__header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+@media (min-width: 768px) {
+  .layout-staff__header {
+    padding-inline: var(--space-6);
+  }
+}
+
+.layout-staff__title {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+  color: var(--text);
+}
+
 .layout-staff__main {
   flex: 1;
   padding: var(--space-4);
   overflow-y: auto;
+  width: 100%;
+  max-width: 1280px;
 }
 
 @media (min-width: 768px) {
@@ -177,7 +443,7 @@ a:hover {
 }
 
 /* ============================================================
-   KHUNG DON GIAN (layout-auth / layout-error)
+   KHUNG AUTH 2 COT (70/30 - 65/35) & KHUNG LOI (layout-auth)
    ============================================================ */
 .layout-auth {
   display: flex;
@@ -186,7 +452,7 @@ a:hover {
   min-height: 100dvh;
 }
 
-.layout-auth__header {
+.layout-auth__error-header {
   padding: var(--space-4);
   display: flex;
   justify-content: space-between;
@@ -195,24 +461,169 @@ a:hover {
   background: var(--surface);
 }
 
-.layout-auth__brand {
-  font-size: var(--text-lg);
-  font-weight: var(--weight-bold);
-  color: var(--primary);
-  text-decoration: none;
-}
-
-.layout-auth__main {
+.layout-auth__error-main {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--space-4);
+  padding: var(--space-6);
+}
+
+.auth-wrapper {
+  display: grid;
+  grid-template-columns: 1fr;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* Bo cuc 60/40 (3fr 2fr) tu 900px tro len; duoi 900px an cot anh */
+@media (min-width: 900px) {
+  .auth-wrapper {
+    grid-template-columns: 3fr 2fr;
+  }
+}
+
+.auth-hero {
+  display: none;
+  position: relative;
+  overflow: hidden;
+  background: #0e1b20;
+}
+
+@media (min-width: 900px) {
+  .auth-hero {
+    display: flex;
+    height: auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+    align-items: flex-end;
+    padding-bottom: var(--space-8);
+  }
+}
+
+/* Anh khuon vien tu nhien, sac net, khong bi phu xanh duc */
+.auth-hero__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+}
+
+/* Chi dung scrim trong suot nhe o day de chu doc ro rang tren nen anh */
+.auth-hero__scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.72) 0%, rgba(0, 0, 0, 0.2) 35%, transparent 65%);
+  z-index: 2;
+}
+
+.auth-hero__content {
+  position: relative;
+  z-index: 3;
+  padding: var(--space-6) var(--space-8);
+  color: #ffffff;
+}
+
+.auth-hero__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-1);
+}
+
+.auth-hero__brand-icon {
+  width: 28px;
+  height: 28px;
+  color: #5bb8d0;
+}
+
+.auth-hero__brand-text {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.5px;
+  color: #ffffff;
+}
+
+.auth-hero__tagline {
+  font-size: var(--text-base);
+  color: #f1f5f9;
+  max-width: 500px;
+  line-height: var(--leading-base);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+.auth-main {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-6);
+  background: var(--bg);
+  overflow-y: auto;
+}
+
+@media (min-width: 900px) {
+  .auth-main {
+    padding: var(--space-6) var(--space-8);
+  }
+}
+
+.auth-main__top-bar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: var(--space-2);
+}
+
+.auth-main__center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  padding: var(--space-2) 0;
+}
+
+/* Header thuong hieu truong hoc nam o BÊN NGOÀI phia tren the card */
+.auth-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: var(--space-4);
+}
+
+.auth-brand__logo {
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+  margin-bottom: var(--space-2);
+}
+
+.auth-brand__school {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  color: var(--primary);
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.auth-brand__portal {
+  font-size: 11px;
+  font-weight: var(--weight-semibold);
+  color: var(--text-muted);
+  letter-spacing: 0.8px;
+}
+
+.auth-card-container {
+  width: 100%;
 }
 
 .auth-card {
   width: 100%;
-  max-width: 440px;
   background: var(--surface-raised);
   border: var(--border-width) solid var(--border-light);
   border-radius: var(--radius-lg);
@@ -224,87 +635,373 @@ a:hover {
 }
 
 .auth-card__title {
-  font-size: var(--text-xl);
+  font-size: var(--text-base);
   font-weight: var(--weight-bold);
   color: var(--text);
-  line-height: var(--leading-tight);
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.auth-card__switch {
+  text-align: center;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  margin-top: var(--space-1);
+}
+
+.auth-main__footer {
+  text-align: center;
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  padding-top: var(--space-4);
 }
 
 /* ============================================================
    THANH DIEU HUONG (NAVBAR)
    ============================================================ */
 .navbar {
+  height: 64px;
+  position: sticky;
+  top: 0;
+  z-index: 200;
   background: var(--surface-raised);
   border-bottom: var(--border-width) solid var(--border-light);
+  display: flex;
+  align-items: center;
 }
 
-.navbar__container {
-  max-width: var(--content-max-student);
-  margin-inline: auto;
-  padding: var(--space-3) var(--space-4);
+.navbar--student {
+  height: 72px;
+  min-height: 72px;
+  box-shadow: var(--shadow-sm);
+}
+
+.navbar > .container-student {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-4);
+  height: 100%;
 }
 
 .navbar__brand {
-  font-size: var(--text-lg);
-  font-weight: var(--weight-bold);
-  color: var(--primary);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
   text-decoration: none;
   white-space: nowrap;
 }
 
-.navbar__nav {
+.navbar__brand-logo {
+  width: 46px;
+  height: 46px;
+  color: var(--primary);
+  flex-shrink: 0;
+  display: block;
+}
+
+.navbar__brand-text {
+  font-size: 20px;
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+/* Khung nen boc hang menu dang vien thuoc */
+.navbar__rail {
   display: none;
-  list-style: none;
-  align-items: center;
-  gap: var(--space-2);
 }
 
 @media (min-width: 768px) {
-  .navbar__nav {
-    display: flex;
+  .navbar__rail {
+    display: inline-flex;
+    align-items: center;
+    position: relative;
+    padding: 5px;
+    gap: 2px;
+    background: var(--surface);
+    border: var(--border-width) solid var(--border-light);
+    border-radius: var(--radius-full);
+    margin-left: var(--space-8);
+    isolation: isolate;
   }
 }
 
+.navbar__indicator {
+  position: absolute;
+  left: 0;
+  top: 5px;
+  bottom: 5px;
+  background: var(--primary);
+  border-radius: var(--radius-full);
+  z-index: 0;
+  transition: transform 280ms var(--easing-std), width 280ms var(--easing-std), opacity 200ms var(--easing-std);
+  pointer-events: none;
+}
+
+/* ul, li, nav trong rail khong co position; lien ket a co position: relative z-index: 1 de chu noi tren vach truot */
+.navbar__nav,
+.navbar__menu,
+.navbar__menu li {
+  position: static;
+}
+
+.navbar__nav {
+  display: flex;
+  align-items: center;
+}
+
+.navbar__menu {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
 .navbar__link {
+  position: relative;
+  z-index: 1;
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-medium);
-  color: var(--text);
+  height: 40px;
+  padding: 0 18px;
+  font-size: 15px;
+  font-weight: var(--weight-semibold);
+  border-radius: var(--radius-full);
+  color: var(--text-muted);
   text-decoration: none;
-  border-radius: var(--radius-md);
-  transition: background var(--duration-fast) var(--easing-std);
+  white-space: nowrap;
+  border: none;
+  background: transparent;
+  transition: color var(--duration-fast) var(--easing-std);
 }
 
 .navbar__link:hover {
-  background: var(--overlay);
+  color: var(--primary);
+}
+
+/* Du phong khi tat JavaScript */
+.navbar__link[aria-current="page"] {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+/* Khi JavaScript da bat */
+.navbar__rail--js .navbar__link[aria-current="page"] {
+  background: transparent;
+  color: var(--text-muted);
+}
+
+.navbar__rail--js .navbar__link.is-lit {
+  color: var(--on-primary) !important;
 }
 
 .navbar__actions {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-2);
+  white-space: nowrap;
+  margin-left: auto;
 }
 
-.navbar__bell {
+.navbar__action-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 44px;
   height: 44px;
+  min-width: 44px;
+  min-height: 44px;
   color: var(--text);
   text-decoration: none;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-full);
+  border: var(--border-width) solid transparent;
+  transition: background var(--duration-fast) var(--easing-std);
 }
 
-.navbar__bell:hover {
+.navbar__action-btn:hover {
+  background: var(--surface);
+}
+
+.navbar__bell-btn {
+  position: relative;
+}
+
+.navbar__bell-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--accent);
+}
+
+/* Cum 3 nut theme tren topbar (hien >= 1024px) */
+.navbar__theme-desktop {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .navbar__theme-desktop {
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+/* Menu avatar nguoi dung */
+.user-menu {
+  position: relative;
+}
+
+.user-menu__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 2px var(--space-2) 2px 2px;
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius-md);
+  background: transparent;
+  cursor: pointer;
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  min-height: 44px;
+  transition: background var(--duration-fast) var(--easing-std);
+}
+
+.user-menu__btn:hover {
   background: var(--overlay);
+}
+
+/* Avatar dang vien thuoc tren thanh tren sinh vien */
+.user-menu__btn--pill {
+  border: var(--border-width) solid var(--border-light);
+  border-radius: var(--radius-full);
+  padding: 4px 12px 4px 4px;
+}
+
+.user-menu__name {
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 899px) {
+  .user-menu__name {
+    display: none;
+  }
+}
+
+.user-menu__dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + var(--space-2));
+  width: 260px;
+  background: var(--surface-raised);
+  border: var(--border-width) solid var(--border-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: var(--space-2) 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+}
+
+.user-menu__header {
+  padding: var(--space-2) var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.user-menu__name-full {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Duoi 1024px hien cum theme trong menu avatar, tu 1024px an */
+.user-menu__theme-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+}
+
+@media (min-width: 1024px) {
+  .user-menu__theme-group {
+    display: none !important;
+  }
+}
+
+.user-menu__divider {
+  border: none;
+  border-top: var(--border-width) solid var(--border-light);
+  margin: var(--space-1) 0;
+}
+
+.user-menu__link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  color: var(--text);
+  text-decoration: none;
+  font-size: var(--text-sm);
+  font-family: var(--font-sans);
+  background: transparent;
+  border: none;
+  width: 100%;
+  cursor: pointer;
+  text-align: left;
+  border-radius: var(--radius-sm);
+  transition: background var(--duration-fast) var(--easing-std), color var(--duration-fast) var(--easing-std);
+}
+
+.user-menu__icon {
+  width: 18px;
+  height: 18px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  transition: color var(--duration-fast) var(--easing-std);
+}
+
+.user-menu__link:hover {
+  background: var(--overlay);
+  color: var(--primary);
+}
+
+.user-menu__link:hover .user-menu__icon {
+  color: var(--primary);
+}
+
+.user-menu__link--danger {
+  color: var(--danger);
+}
+
+.user-menu__link--danger:hover {
+  background: rgba(185, 28, 28, 0.08);
+  color: var(--danger);
+}
+
+.user-menu__link--danger .user-menu__icon {
+  color: var(--danger);
+}
+
+.user-menu__logout-form {
+  margin: 0;
+  padding: 0;
 }
 
 /* ============================================================
@@ -346,8 +1043,8 @@ a:hover {
 }
 
 .nav-bottom__icon {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
 }
 
 @media (min-width: 768px) {
@@ -446,6 +1143,73 @@ a:hover {
   color: var(--text);
 }
 
+.form-field__label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.auth-card__forgot {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.auth-card__forgot:hover {
+  text-decoration: underline;
+}
+
+.auth-card__switch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.auth-card__switch-link {
+  font-weight: var(--weight-semibold);
+  text-decoration: none;
+}
+
+.auth-card__switch-link:hover {
+  text-decoration: underline;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.input-with-toggle {
+  padding-right: 44px !important;
+}
+
+.btn-toggle-password {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  padding: 8px;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-toggle-password:hover {
+  color: var(--text);
+}
+
 .form-field__input {
   display: block;
   width: 100%;
@@ -479,31 +1243,229 @@ a:hover {
 }
 
 /* ============================================================
-   THE (CARD & TICKET)
+   BANNER CHAO SINH VIEN (HOME HERO)
+   ============================================================ */
+.home-hero {
+  position: relative;
+  background: var(--primary);
+  color: var(--on-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-8);
+  margin-bottom: var(--space-8);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.home-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("/images/paper-lines.svg");
+  background-repeat: repeat;
+  pointer-events: none;
+}
+
+.home-hero__greeting {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.08em;
+  color: var(--on-primary);
+  opacity: 0.85;
+}
+
+.home-hero__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.home-hero__title {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+  color: var(--on-primary);
+}
+
+.badge--surface {
+  background: var(--surface);
+  color: var(--primary);
+  font-weight: var(--weight-semibold);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+}
+
+.home-hero__tagline {
+  font-size: var(--text-base);
+  line-height: var(--leading-base);
+  color: var(--on-primary);
+  opacity: 0.95;
+  max-width: 600px;
+}
+
+.home-hero__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  margin-top: var(--space-2);
+  position: relative;
+  z-index: 1;
+}
+
+.btn--hero-primary {
+  background: var(--surface-raised);
+  color: var(--primary);
+  border-color: transparent;
+}
+
+.btn--hero-primary:hover {
+  background: var(--surface);
+  color: var(--primary-hover);
+}
+
+.btn--hero-secondary {
+  background: transparent;
+  color: var(--on-primary);
+  border-color: var(--on-primary);
+}
+
+.btn--hero-secondary:hover {
+  background: var(--overlay);
+  color: var(--on-primary);
+}
+
+[data-theme="dark"] .home-hero {
+  background: linear-gradient(135deg, #0f2942 0%, #0c3b5e 100%);
+  border: var(--border-width) solid rgba(56, 189, 248, 0.22);
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .home-hero__greeting,
+[data-theme="dark"] .home-hero__title {
+  color: #f8fafc;
+}
+
+[data-theme="dark"] .home-hero__tagline {
+  color: #cbd5e1;
+}
+
+[data-theme="dark"] .home-hero .badge--surface {
+  background: rgba(56, 189, 248, 0.16);
+  color: #7dd3fc;
+  border: 1px solid rgba(56, 189, 248, 0.28);
+}
+
+[data-theme="dark"] .btn--hero-primary {
+  background: #0284c7;
+  color: #ffffff;
+}
+
+[data-theme="dark"] .btn--hero-primary:hover {
+  background: #0ea5e9;
+  color: #ffffff;
+}
+
+[data-theme="dark"] .btn--hero-secondary {
+  background: rgba(255, 255, 255, 0.06);
+  color: #e2e8f0;
+  border-color: rgba(148, 163, 184, 0.4);
+}
+
+[data-theme="dark"] .btn--hero-secondary:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+/* ============================================================
+   THE (CARD, TICKET & JOURNEY)
    ============================================================ */
 .card {
   background: var(--surface-raised);
   border: var(--border-width) solid var(--border-light);
   border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
   padding: var(--space-5);
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
 }
 
+.welcome-card {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+  padding: var(--space-5) var(--space-6);
+}
+
+.welcome-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.welcome-card__title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.welcome-card__title {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.welcome-card__subtitle {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.journey-section {
+  margin-bottom: var(--space-8);
+}
+
+.journey-section__title {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--text);
+  margin-bottom: var(--space-4);
+}
+
+.journey-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-4);
+}
+
+.journey-grid--staff {
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+
+/* The ve (Ticket) - chu ky hinh anh khung sinh vien */
 .ticket {
   background: var(--surface-raised);
   border: var(--border-width) solid var(--border-light);
   border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
 }
 
 .ticket__body {
   padding: var(--space-5);
+  flex: 1;
 }
 
 .ticket__stub {
   position: relative;
-  padding: var(--space-4) var(--space-5);
+  padding: var(--space-3) var(--space-5);
   border-top: var(--border-width) dashed var(--border);
 }
 
@@ -529,22 +1491,159 @@ a:hover {
   clip-path: inset(0 50% 0 0);
 }
 
+.journey-card {
+  text-decoration: none;
+  color: var(--text);
+  transition: border-color 200ms var(--easing-std), transform 200ms var(--easing-std), box-shadow 200ms var(--easing-std);
+}
+
+.journey-card:hover {
+  border-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .journey-card:hover {
+    transform: none;
+  }
+}
+
+.journey-card:focus-visible {
+  outline: var(--border-width-thick) solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+.journey-card--staff {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-5);
+  background: var(--surface-raised);
+  border: var(--border-width) solid var(--border-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.journey-card__icon-box {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background: var(--primary-soft, var(--surface));
+  color: var(--primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--space-3);
+}
+
+.journey-card__footer {
+  margin-top: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: var(--border-width) solid var(--border-light);
+}
+
+.journey-card__body {
+  flex: 1;
+}
+
+.journey-card__title {
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  color: var(--text);
+  margin-bottom: var(--space-1);
+}
+
+.journey-card__desc {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  line-height: var(--leading-base);
+}
+
+.journey-card__action {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  color: var(--primary);
+}
+
+/* Hang 2 cot: Lich sap toi & Thong bao */
+.home-dual-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+  margin-top: var(--space-8);
+  margin-bottom: var(--space-8);
+}
+
+@media (min-width: 768px) {
+  .home-dual-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.empty-card {
+  padding: var(--space-5);
+}
+
+.empty-card__heading {
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  margin-bottom: var(--space-4);
+  color: var(--text);
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--space-6) var(--space-4);
+  gap: var(--space-2);
+}
+
+.empty-state__icon {
+  width: 32px;
+  height: 32px;
+  color: var(--text-muted);
+  margin-bottom: var(--space-1);
+}
+
+.empty-state__title {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--text);
+}
+
+.empty-state__desc {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
 /* ============================================================
    THE CHU DE SANG / TOI (THEME SWITCHER)
    ============================================================ */
 .theme-switcher {
   display: inline-flex;
-  border: var(--border-width) solid var(--border);
-  border-radius: var(--radius-md);
-  overflow: hidden;
+  align-items: center;
+  border: var(--border-width) solid var(--border-light);
+  border-radius: var(--radius-full);
+  padding: 3px;
+  gap: 2px;
+  background: var(--surface);
 }
 
 .theme-switcher__btn {
-  padding: var(--space-1) var(--space-3);
-  min-height: 36px;
-  font-size: var(--text-sm);
-  font-weight: var(--weight-medium);
-  font-family: var(--font-sans);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  padding: 0;
+  border-radius: var(--radius-full);
   background: transparent;
   color: var(--text-muted);
   border: none;
@@ -552,6 +1651,12 @@ a:hover {
   transition:
     background var(--duration-fast) var(--easing-std),
     color var(--duration-fast) var(--easing-std);
+}
+
+.theme-switcher__btn svg,
+.theme-switcher__btn .icon {
+  width: 16px;
+  height: 16px;
 }
 
 .theme-switcher__btn[aria-pressed="true"] {
@@ -575,6 +1680,10 @@ a:hover {
   display: flex;
   align-items: center;
   gap: var(--space-2);
+}
+
+.alert__icon {
+  flex-shrink: 0;
 }
 
 .alert--error {
@@ -612,9 +1721,516 @@ a:hover {
    ============================================================ */
 .footer {
   border-top: var(--border-width) solid var(--border-light);
-  background: var(--surface);
+  background: transparent;
   padding: var(--space-4);
   text-align: center;
   font-size: var(--text-sm);
   color: var(--text-muted);
+}
+
+/* ============================================================
+   TRANG HO SO HOC TAP (PROFILE)
+   ============================================================ */
+.profile-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-5);
+}
+
+.profile-subtitle {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-5);
+  align-items: start;
+}
+
+@media (min-width: 960px) {
+  .profile-grid {
+    grid-template-columns: 1.15fr 1fr;
+  }
+}
+
+.profile-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.profile-section__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.profile-section__title {
+  font-size: var(--text-md);
+  font-weight: var(--weight-semibold);
+  color: var(--text);
+}
+
+.form-row-2 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+}
+
+@media (min-width: 600px) {
+  .form-row-2 {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.repeater-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.repeater-row {
+  display: grid;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.repeater-row--subject {
+  grid-template-columns: 120px 1fr auto;
+}
+
+.repeater-row--slot {
+  grid-template-columns: 110px 1fr 1fr auto;
+}
+
+@media (max-width: 560px) {
+  .repeater-row--subject,
+  .repeater-row--slot {
+    grid-template-columns: 1fr;
+  }
+}
+
+.profile-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.form-hint {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.required {
+  color: var(--danger);
+}
+
+/* ============================================================
+   THONG BAO TOAST (SONNER / REACT STYLE)
+   ============================================================ */
+.toast-container {
+  position: fixed;
+  top: 80px;
+  right: var(--space-5);
+  z-index: 1200;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: min(380px, calc(100vw - 32px));
+  pointer-events: none;
+}
+
+@media (max-width: 639px) {
+  .toast-container {
+    top: 72px;
+    right: var(--space-4);
+    left: var(--space-4);
+    width: auto;
+  }
+}
+
+.toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: 14px var(--space-4);
+  background: var(--surface-raised);
+  color: var(--text);
+  border: var(--border-width) solid var(--border-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  opacity: 0;
+  transform: translateY(-10px) scale(0.97);
+  transition: opacity 220ms var(--easing-out), transform 220ms var(--easing-out);
+}
+
+.toast.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.toast.is-leaving {
+  opacity: 0;
+  transform: translateY(-8px) scale(0.96);
+}
+
+.toast__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+.toast--success .toast__icon {
+  background: var(--status-approved-bg);
+  color: var(--status-approved-text);
+}
+
+.toast--error .toast__icon {
+  background: var(--status-noshow-bg);
+  color: var(--status-noshow-text);
+}
+
+.toast--info .toast__icon {
+  background: var(--primary-soft, var(--surface));
+  color: var(--primary);
+}
+
+.toast__content {
+  flex: 1;
+  min-width: 0;
+  padding-top: 3px;
+}
+
+.toast__message {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-base);
+  color: var(--text);
+}
+
+.toast__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background var(--duration-fast) var(--easing-std), color var(--duration-fast) var(--easing-std);
+}
+
+.toast__close:hover {
+  background: var(--surface);
+  color: var(--text);
+}
+
+/* ============================================================
+   TRANG QUAN TRI TAI KHOAN (ADMIN USERS)
+   ============================================================ */
+.admin-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.admin-header__title {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-bold);
+  color: var(--text);
+}
+
+.admin-header__subtitle {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.filter-bar {
+  margin-bottom: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+@media (min-width: 900px) {
+  .filter-bar {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+}
+
+.filter-bar__fields {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-3);
+  flex: 1;
+}
+
+@media (min-width: 640px) {
+  .filter-bar__fields {
+    grid-template-columns: 1.5fr 1fr 1fr;
+  }
+}
+
+.filter-bar__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+.data-table-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.data-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+  text-align: left;
+}
+
+.data-table th {
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  background: var(--surface);
+  border-bottom: var(--border-width) solid var(--border-light);
+  white-space: nowrap;
+}
+
+.data-table td {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: var(--border-width) solid var(--border-light);
+  vertical-align: middle;
+}
+
+.data-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.data-table tbody tr:hover {
+  background: var(--overlay);
+}
+
+.data-table__col-actions {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.table-user {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.table-user__meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.table-user__name {
+  font-weight: var(--weight-semibold);
+  color: var(--text);
+}
+
+.table-user__email {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+}
+
+.status-pill--active {
+  background: var(--status-approved-bg);
+  color: var(--status-approved-text);
+}
+
+.status-pill--locked {
+  background: var(--status-noshow-bg);
+  color: var(--status-noshow-text);
+}
+
+.table-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.inline-form {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.form-field__input--compact {
+  width: auto;
+  padding: 6px 10px;
+  font-size: var(--text-xs);
+  min-height: 32px;
+}
+
+.btn--danger-outline {
+  background: transparent;
+  color: var(--danger);
+  border: var(--border-width) solid var(--danger);
+}
+
+.btn--danger-outline:hover {
+  background: var(--status-noshow-bg);
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-top: var(--border-width) solid var(--border-light);
+}
+
+.pagination__info {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+/* ============================================================
+   MODAL CHUNG
+   ============================================================ */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  z-index: 1100;
+}
+
+.modal-card {
+  width: min(460px, 100%);
+  box-shadow: var(--shadow-md);
+}
+
+.modal-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-bottom: var(--space-3);
+  border-bottom: var(--border-width) solid var(--border-light);
+}
+
+.modal-card__title {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  color: var(--text);
+}
+
+.modal-card__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.modal-card__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  padding-top: var(--space-2);
+}
+
+/* ============================================================
+   TRO LY AI (/assistant)
+   ============================================================ */
+.assistant-reply {
+  margin-bottom: var(--space-5);
+  border-color: var(--primary);
+}
+
+.assistant-reply__text {
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  line-height: var(--leading-base);
+  color: var(--text);
+}
+
+.assistant-history {
+  margin-top: var(--space-5);
+}
+
+.assistant-history__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.assistant-history__item {
+  padding-top: var(--space-3);
+  border-top: var(--border-width) solid var(--border-light);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.assistant-history__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+}
+
+.assistant-history__prompt {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--text);
 }

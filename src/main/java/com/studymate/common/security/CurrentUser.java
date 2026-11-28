@@ -25,7 +25,19 @@ public class CurrentUser extends User implements Serializable {
             Role role,
             boolean enabled,
             Collection<? extends GrantedAuthority> authorities) {
-        super(email, passwordHash, enabled, true, true, true, authorities);
+        this(id, email, passwordHash, fullName, role, enabled, true, authorities);
+    }
+
+    public CurrentUser(
+            Long id,
+            String email,
+            String passwordHash,
+            String fullName,
+            Role role,
+            boolean enabled,
+            boolean accountNonLocked,
+            Collection<? extends GrantedAuthority> authorities) {
+        super(email, passwordHash, enabled, true, true, accountNonLocked, authorities);
         this.id = id;
         this.fullName = fullName;
         this.role = role;

@@ -3,38 +3,40 @@
 :root {
   color-scheme: light;
 
-  /* Mau nen */
-  --bg: #eef6f7;
-  --surface: #d6ecf0;
+  /* Mau nen - Modern Academic Blue & Slate */
+  --bg: #f8fafc;
+  --surface: #f1f5f9;
   --surface-raised: #ffffff;
-  --overlay: rgba(11, 93, 122, 0.08);
+  --overlay: rgba(2, 132, 199, 0.08);
 
   /* Chu */
-  --text: #0f2a33;
-  --text-muted: #4a6670;
-  --text-inverse: #eef6f7;
+  --text: #0f172a;
+  --text-muted: #64748b;
+  --text-inverse: #ffffff;
 
   /* Mau chinh */
-  --primary: #0b5d7a;
-  --primary-hover: #094d66;
-  --on-primary: #eef6f7;
+  --primary: #0284c7;
+  --primary-hover: #0369a1;
+  --primary-soft: #e0f2fe;
+  --on-primary: #ffffff;
 
   /* Mau nhan am */
-  --accent: #c2410c;
-  --accent-hover: #a33509;
+  --accent: #ea580c;
+  --accent-hover: #c2410c;
   --on-accent: #ffffff;
 
   /* Mau nguy hiem */
-  --danger: #b91c1c;
+  --danger: #dc2626;
   --on-danger: #ffffff;
 
   /* Duong ke va vien */
-  --border: #4a7a87;
-  --border-light: #8fb8c4;
-  --border-focus: #0b5d7a;
+  --border: #cbd5e1;
+  --border-light: #e2e8f0;
+  --border-focus: #0284c7;
 
   /* Phong chu */
-  --font-sans: "Be Vietnam Pro", "Noto Sans", system-ui, -apple-system, sans-serif;
+  --font-sans:
+    "Be Vietnam Pro", "Noto Sans", system-ui, -apple-system, sans-serif;
   --text-xs: 12px;
   --text-sm: 14px;
   --text-base: 16px;
@@ -63,14 +65,16 @@
   --space-16: 64px;
 
   /* Bo goc */
-  --radius-sm: 3px;
-  --radius-md: 6px;
-  --radius-lg: 10px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
   --radius-full: 9999px;
 
   /* Bong do */
-  --shadow-sm: 0 1px 3px rgba(11, 93, 122, 0.08);
-  --shadow-md: 0 4px 12px rgba(11, 93, 122, 0.1);
+  --shadow-sm:
+    0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.03);
+  --shadow-md:
+    0 4px 12px rgba(15, 23, 42, 0.07), 0 2px 4px rgba(15, 23, 42, 0.04);
 
   /* Do day duong ke */
   --border-width: 1px;
@@ -85,7 +89,7 @@
 
   /* Khung bo cuc */
   --nav-bottom-height: calc(56px + env(safe-area-inset-bottom));
-  --content-max-student: 960px;
+  --content-max-student: 1300px;
 
   /* Trang thai dat phong (light) */
   --status-pending-bg: #fef3c7;
@@ -112,29 +116,30 @@
 [data-theme="dark"] {
   color-scheme: dark;
 
-  --bg: #0e1b20;
-  --surface: #14262d;
-  --surface-raised: #1c3540;
-  --overlay: rgba(91, 184, 208, 0.08);
+  --bg: #0f172a;
+  --surface: #162032;
+  --surface-raised: #1e293b;
+  --overlay: rgba(56, 189, 248, 0.1);
 
-  --text: #e6f1f3;
-  --text-muted: #9db5bc;
-  --text-inverse: #08222b;
+  --text: #f1f5f9;
+  --text-muted: #94a3b8;
+  --text-inverse: #0f172a;
 
-  --primary: #5bb8d0;
-  --primary-hover: #74c5da;
-  --on-primary: #08222b;
+  --primary: #0ea5e9;
+  --primary-hover: #38bdf8;
+  --primary-soft: rgba(14, 165, 233, 0.16);
+  --on-primary: #f8fafc;
 
-  --accent: #f08a5d;
-  --accent-hover: #f5a07c;
+  --accent: #fb923c;
+  --accent-hover: #fdba74;
   --on-accent: #1a0f0a;
 
   --danger: #f87171;
   --on-danger: #1a0000;
 
-  --border: #5090a0;
-  --border-light: #2e4e58;
-  --border-focus: #5bb8d0;
+  --border: #334155;
+  --border-light: #293548;
+  --border-focus: #38bdf8;
 
   --status-pending-bg: #2d1b00;
   --status-pending-text: #fde68a;

@@ -3,9 +3,31 @@
 <head th:replace="~{layout/fragments/head :: head(${title})}"></head>
 <body class="layout-staff">
     <aside th:replace="~{layout/fragments/navbar :: staffSidebar}"></aside>
-    <main class="layout-staff__main">
-        <th:block th:replace="${content}"></th:block>
-    </main>
-    <script th:src="@{/js/theme.js}"></script>
+
+    <div class="layout-staff__wrapper">
+        <header class="layout-staff__header">
+            <div class="layout-staff__header-left">
+                <button type="button" class="sidebar-toggle" id="sidebarToggleBtn" aria-expanded="false" aria-controls="staffSidebar" aria-label="Mở menu quản trị">
+                    <svg class="icon" aria-hidden="true"><use href="#icon-list"/></svg>
+                </button>
+                <h1 class="layout-staff__title" th:text="${title}">Quản lý</h1>
+            </div>
+
+            <div th:replace="~{layout/fragments/navbar :: staffHeaderActions}"></div>
+        </header>
+
+        <main class="layout-staff__main">
+            <th:block th:replace="${content}"></th:block>
+        </main>
+
+        <footer th:replace="~{layout/fragments/footer :: footer}"></footer>
+    </div>
+
+    <div class="sidebar-backdrop" id="sidebarBackdrop" hidden></div>
+    <div th:replace="~{fragments/toast :: toastContainer}"></div>
+    <div th:replace="~{fragments/icons :: svgSprite}" style="display:none;" hidden aria-hidden="true"></div>
+    <script th:src="@{/js/theme.js}" defer></script>
+    <script th:src="@{/js/staff-drawer.js}" defer></script>
+    <script th:src="@{/js/toast.js}" defer></script>
 </body>
 </html>

@@ -2,11 +2,16 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org" th:fragment="layout(title, content)">
 <head th:replace="~{layout/fragments/head :: head(${title})}"></head>
 <body class="layout-student">
+    <div th:replace="~{fragments/icons :: svgSprite}"></div>
     <header th:replace="~{layout/fragments/navbar :: studentNavbar}"></header>
-    <main class="layout-student__main">
+    <main class="layout-student__main container-student">
         <th:block th:replace="${content}"></th:block>
     </main>
     <nav th:replace="~{layout/fragments/navbar :: studentBottomNav}"></nav>
     <footer th:replace="~{layout/fragments/footer :: footer}"></footer>
+    <div th:replace="~{fragments/toast :: toastContainer}"></div>
+    <script th:src="@{/js/theme.js}" defer></script>
+    <script th:src="@{/js/navbar.js}" defer></script>
+    <script th:src="@{/js/toast.js}" defer></script>
 </body>
 </html>

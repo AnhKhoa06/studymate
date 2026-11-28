@@ -535,16 +535,22 @@ Nội dung chính của khung STUDENT phải chừa chỗ cho thanh tab dưới,
 #### Bố cục máy tính (STUDENT, ≥768px)
 
 ```
-+------------------------------------------------------------+
-|  StudyMate | Tìm bạn  Nhóm  Đặt phòng  Chat      [hồ sơ]    |  <- Thanh nav ngang
-+------------------------------------------------------------+
-|                                                            |
-|        [nội dung, max-width: 960px, căn giữa]              |
-|                                                            |
-+------------------------------------------------------------+
++-------------------------------------------------------------------------------------------------+
+| [icon-brand] StudyMate | [  Tìm bạn    Nhóm    Đặt phòng    Chat  ] | [Theme] [chuông] [avatar] | <- Thanh trên: 72px, sticky
++-------------------------------------------------------------------------------------------------+
+|                                                                                                 |
+|                          [nội dung, max-width: 960px, căn giữa]                                 |
+|                                                                                                 |
++-------------------------------------------------------------------------------------------------+
 ```
 
-Không dùng sidebar. Nội dung rộng tối đa 960px (`--content-max-student`), căn giữa. Nút chọn theme ở thanh nav phải (xem mục 9).
+Không dùng sidebar. Chiều cao thanh trên 72px, sticky top, nền `--bg`, viền dưới 1px `--border-light`. Nội dung bên trong dùng chung `.container-student` (`max-width: var(--content-max-student)` = 960px, `margin-inline: auto`, `padding-inline: var(--space-4)`) để mép logo và mép nội dung thẳng hàng.
+- **Trái:** Biểu tượng thương hiệu nằm trong hộp vuông 36px nền `--primary` bo `--radius-md` chứa icon `icon-brand` màu trắng + chữ "StudyMate" đậm; kế bên (cách khoảng 32px) là thanh ray điều hướng dạng pill `.navbar__rail` (nền `--surface-raised`, viền `--border-light`, bo `--radius-full`, padding 4px).
+- **Thanh ray điều hướng (`.navbar__rail`):** CHỈ GỒM CHỮ 4 mục: Tìm bạn, Nhóm, Đặt phòng, Chat (`white-space: nowrap`), KHÔNG icon, KHÔNG xuống dòng. Mục "Phòng" đã được bỏ hoàn toàn khỏi menu sinh viên. Bên dưới các liên kết có vạch trượt mềm `.navbar__indicator` (bo `--radius-full`, nền `--primary`, chữ trắng) được điều khiển trượt động bởi `navbar.js` theo mục active hoặc vị trí hover/focus.
+- **Phải:** Cụm chuyển chủ đề giao diện (hiển thị ở ≥1024px), chuông thông báo (44×44px, chỉ icon, không chấm báo khi chưa có số chưa đọc), nút avatar pill (vòng tròn chữ cái đầu viết hoa, họ tên cắt bằng ellipsis tối đa khoảng 160px, ẩn tên dưới 900px, kèm mũi tên `icon-chevron-down`).
+- **Menu avatar dropdown:** rộng khoảng 260px, canh mép phải, bo `--radius-lg`, viền `--border-light`, bóng `--shadow-md`. Dùng mẫu nút `aria-expanded` (không `role="menu"`). Thứ tự nội dung: họ tên và huy hiệu vai trò, liên kết "Hồ sơ" (`/profile`), nhóm nhãn "Giao diện" kèm cụm 3 nút theme (hiển thị khi <1024px), vạch ngăn, nút "Đăng xuất" (form POST `th:action="@{/logout}"`).
+- **Banner đầu trang (`.home-hero`):** Nền `--surface-raised`, viền `--border-light`, bo `--radius-lg`, phủ hoa văn kẻ ngang thư viện `paper-lines.svg` (28px lặp, độ mờ 10%), huy hiệu vai trò pill, tiêu đề chào và thông điệp học tập ấm áp.
+- **Thẻ hành trình học nhóm (`.ticket.journey-card`):** Dạng thẻ phiếu thư viện 2 phần: phần thân chứa hộp icon 40px (nền `--primary` nhạt hoặc `--surface`, icon nét mảnh), tiêu đề và mô tả; phần cuống `.ticket__stub` chứa nhãn "Bắt đầu" kèm mũi tên `icon-caret-right`. Toàn bộ thẻ là liên kết `<a>`, hover nâng nhẹ 2px (`transform: translateY(-2px)`), viền chuyển sang `--primary`. Không dùng số bước giả lập 1, 2, 3, 4.
 
 ---
 
@@ -659,12 +665,12 @@ Dùng chung khung sidebar, chỉ khác menu.
 
 ```
 +--------------+--------------------------------------------+
-| [Logo]       |  Tiêu đề trang                   [hồ sơ]   |
+| [Logo]       | [=] Tiêu đề trang (<h1> duy nhất)  [hồ sơ] | <- Header: 64px
 | StudyMate    +--------------------------------------------+
 |              |                                            |
 | MANAGER menu |   [Bảng / Biểu đồ / Danh sách]             |
-|  - Phòng học |                                            |
-|  - Yêu cầu   |                                            |
+|  - QL phòng  |                                            |
+|  - Duyệt     |                                            |
 |  - Thống kê  |                                            |
 |              |                                            |
 | ADMIN menu   |                                            |
@@ -673,34 +679,43 @@ Dùng chung khung sidebar, chỉ khác menu.
 |              |                                            |
 | [Sáng|Tối    |                                            |
 |  |Hệ thống]  |                                            |
-| [Đăng xuất]  |                                            |
+| [Đăng xuất]  |   © 2026 StudyMate                         | <- Footer trong wrapper
 +--------------+--------------------------------------------+
 ```
 
-**Menu MANAGER:** Phòng học, Yêu cầu đặt phòng, Thống kê sử dụng.
+**Menu MANAGER:** Quản lý phòng, Duyệt đặt phòng, Thống kê.
 
-**Menu ADMIN:** Quản lý tài khoản, Nhật ký hệ thống, Phòng học (xem).
+**Menu ADMIN:** Tài khoản, Nhật ký hệ thống, Quản lý phòng (xem).
 
-Sidebar rộng 240px, thu gọn về 56px (chỉ icon, tooltip on hover). Trên `< 768px`: sidebar ẩn, nút `[menu]` (icon `list`) ở góc trên trái mở drawer overlay.
+Sidebar rộng cố định 240px, cao `100dvh` dính (`position: sticky; top: 0;`). Trên màn hình máy tính, bố cục dùng lưới 2 cột: cột 1 là sidebar (240px), cột 2 là khung bọc `.layout-staff__wrapper` (`minmax(0, 1fr)`). Toàn bộ header 64px, nội dung chính `<main>`, và `<footer>` nằm TRONG wrapper này để đảm bảo footer không rơi xuống dưới sidebar.
+Trang chỉ có ĐÚNG MỘT thẻ `<h1>` duy nhất nằm ở dải tiêu đề header 64px; các thẻ nội dung bên dưới (như lời chào) không dùng `<h1>`.
+
+Trên màn hình nhỏ (`< 768px`): sidebar ẩn khỏi màn hình và hoạt động như drawer overlay (`is-open`), mở bằng nút menu hamburger `[=]` (icon `icon-list`, `aria-controls="staffSidebar"`, `aria-expanded="false"`), có lớp phủ mờ `.layout-staff__backdrop`, đóng bằng phím Escape hoặc click ra ngoài, được quản lý độc lập bởi `static/js/staff-drawer.js`.
 
 ```css
-.sidebar {
-  width: 240px;
+.layout-staff {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
   min-height: 100dvh;
+}
+
+.sidebar {
+  grid-column: 1;
+  width: 240px;
+  height: 100dvh;
+  position: sticky;
+  top: 0;
   background: var(--surface);
   border-right: var(--border-width) solid var(--border-light);
   display: flex;
   flex-direction: column;
-  transition: width var(--duration-base) var(--easing-std);
 }
 
-.sidebar.collapsed {
-  width: 56px;
-}
-
-.layout-staff {
-  display: grid;
-  grid-template-columns: auto 1fr;
+.layout-staff__wrapper {
+  grid-column: 2;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
   min-height: 100dvh;
 }
 ```
@@ -722,6 +737,7 @@ Bảng dữ liệu dùng mật độ cao (`--space-2`/`--space-3` padding ô), k
 
 - `templates/layout/student.html` — Khung STUDENT: thanh nav trên + tab dưới (mobile), nav ngang (desktop), script theme, head chung. `<body class="layout-student">`.
 - `templates/layout/staff.html` — Khung MANAGER/ADMIN: sidebar + header, script theme, head chung. `<body class="layout-staff">`.
+- `templates/layout/auth.html` — Khung AUTH hai cột (Đăng nhập, Đăng ký): từ 900px chia hai cột theo tỉ lệ 60/40 (cột trái 60% ảnh `campus.jpg` tự nhiên với scrim tối nhẹ ở đáy để đọc chữ; cột phải 40% `logo.png` nằm ngoài phía trên form + thẻ form gọn tối đa khoảng 420px căn giữa dọc + theme switcher icon góc phải). Dưới 900px ẩn cột ảnh, form chiếm toàn chiều rộng. Trang lỗi 403/404/500 dùng thẻ giữa trang căn giữa kèm icon lớn. `<body class="layout-auth">`.
 
 > **Lưu ý bảo mật:** Ẩn mục menu trong HTML không thay thế phân quyền. Controller và Service vẫn phải có `@PreAuthorize`. Người dùng sai role bị từ chối ở server, không phải chỉ ẩn nút.
 
@@ -1067,34 +1083,48 @@ Nút hủy hành động (thoát an toàn) đứng trước nút xác nhận (ng
 
 ## 5. Icon
 
-**Triết lý:** mặc định dùng chữ. Icon chỉ xuất hiện khi thật sự cần — tại những chỗ chữ không đủ hoặc không tự nhiên.
+**Triết lý:** Mặc định dùng chữ rõ ràng. Icon hỗ trợ nhận diện nhanh tại các điểm điều hướng, trạng thái, và hành động.
 
-**Bộ icon duy nhất** — SVG inline, nét đơn `1.5px`, không mixed filled/outline. Không emoji.
+**Bộ icon duy nhất** — SVG sprite nội tuyến tập trung (`templates/fragments/icons.html`), ẩn bằng `width="0" height="0" style="position:absolute" aria-hidden="true"`, các symbol có viewBox `0 0 24 24`, nét đơn `1.5px`, dùng `currentColor`, kích thước mặc định 20px. Không dùng thư viện ngoài, không CDN, không emoji.
 
-| #   | Tên                | Dùng cho                        | Ngữ cảnh                      |
-| --- | ------------------ | ------------------------------- | ----------------------------- |
-| 1   | `magnifying-glass` | Tab Tìm bạn                     | Tab bar                       |
-| 2   | `users`            | Tab Nhóm                        | Tab bar                       |
-| 3   | `calendar-blank`   | Tab Đặt phòng                   | Tab bar                       |
-| 4   | `chat-circle`      | Tab Chat                        | Tab bar                       |
-| 5   | `user-circle`      | Tab Hồ sơ                       | Tab bar                       |
-| 6   | `bell`             | Thông báo                       | Thanh trên                    |
-| 7   | `x`                | Đóng dialog, toast              | Dialog, toast                 |
-| 8   | `check`            | Xác nhận, trạng thái thành công | Inline                        |
-| 9   | `warning-circle`   | Lỗi, cảnh báo                   | Inline                        |
-| 10  | `caret-left`       | Quay lại                        | Thanh trên                    |
-| 11  | `list`             | Mở sidebar (hamburger)          | Staff mobile                  |
-| 12  | `sign-out`         | Đăng xuất                       | Menu sidebar / hồ sơ          |
-| 13  | `pencil`           | Chỉnh sửa                       | Hành động inline              |
-| 14  | `plus`             | Thêm mới                        | Nút tạo nhóm, thêm thành viên |
-| 15  | `arrow-clockwise`  | Thử lại                         | Trang lỗi 500                 |
+Sử dụng qua cú pháp: `<svg class="icon" aria-hidden="true"><use href="#id"/></svg>`.
+
+| #   | Tên Symbol              | Ý nghĩa / Dùng cho               | Ngữ cảnh                                  |
+| --- | ----------------------- | -------------------------------- | ----------------------------------------- |
+| 1   | `icon-brand`            | Logo dự án StudyMate             | Thanh trên, Auth hero, Sidebar            |
+| 2   | `icon-search`           | Tìm bạn học (hoặc `icon-magnifying-glass`) | Topbar, Tab bar, Thẻ hành trình |
+| 3   | `icon-users`            | Nhóm học                         | Topbar, Tab bar, Thẻ hành trình           |
+| 4   | `icon-door`             | Phòng học                        | Quản lý phòng                             |
+| 5   | `icon-calendar`         | Đặt phòng (hoặc `icon-calendar-blank`) | Topbar, Tab bar, Thẻ hành trình     |
+| 6   | `icon-clock`            | Chốt giờ rảnh chung              | Thẻ hành trình                            |
+| 7   | `icon-chat`             | Chat                             | Topbar, Tab bar                           |
+| 8   | `icon-bell`             | Thông báo                        | Thanh trên (icon chuông)                  |
+| 9   | `icon-user`             | Người dùng                       | Ô nhập Họ tên                             |
+| 10  | `icon-user-circle`      | Hồ sơ cá nhân                    | Menu avatar, Tab bar                      |
+| 11  | `icon-mail`             | Thư / Email                      | Ô nhập Email                              |
+| 12  | `icon-lock`             | Ổ khóa / Bảo mật                 | Ô nhập Mật khẩu, Trang lỗi 403            |
+| 13  | `icon-eye`              | Hiện mật khẩu                    | Nút toggle mật khẩu                       |
+| 14  | `icon-eye-slash`        | Ẩn mật khẩu                      | Nút toggle mật khẩu                       |
+| 15  | `icon-sun`              | Giao diện Sáng                   | Theme switcher                            |
+| 16  | `icon-moon`             | Giao diện Tối                    | Theme switcher                            |
+| 17  | `icon-desktop`          | Giao diện Hệ thống               | Theme switcher                            |
+| 18  | `icon-logout`           | Đăng xuất                        | Menu avatar, Sidebar footer               |
+| 19  | `icon-chevron-down`     | Mũi tên xuống                    | Nút avatar trigger                        |
+| 20  | `icon-arrow-right`      | Mũi tên phải (hoặc `icon-caret-right`) | Nút submit form, Thẻ hành trình     |
+| 21  | `icon-warning`          | Cảnh báo, lỗi                    | Lỗi form-field, Alert error, Lỗi 500      |
+| 22  | `icon-check`            | Thành công, xác nhận             | Alert success, Duyệt đặt phòng            |
+| 23  | `icon-info`             | Thông tin                        | Alert info                                |
+| 24  | `icon-home`             | Trang chủ                        | Nút về trang chủ ở các trang lỗi          |
+| 25  | `icon-chart`            | Thống kê                         | Sidebar Staff                             |
+| 26  | `icon-shield`           | Quản lý tài khoản Admin          | Sidebar Staff                             |
+| 27  | `icon-list`             | Menu hamburger mobile            | Header Staff (<768px)                     |
 
 **Quy tắc sử dụng:**
 
-- Icon kèm nhãn chữ: `aria-hidden="true"` trên `<svg>`.
-- Icon đứng một mình (chuông, đóng): `aria-label="Thông báo"` trên `<button>` chứa icon.
-- Không dùng icon trang trí trước tiêu đề mục, trước từng dòng thẻ.
-- Không dùng icon trong badge, không dùng icon trong nút có đủ chữ.
+- Icon đi kèm nhãn chữ: dùng `aria-hidden="true"` trên thẻ `<svg>`.
+- Icon chỉ có nút (không có chữ): PHẢI có `aria-label` và `title` trên phần tử cha (`<button>` hoặc `<a>`).
+- Trong khung đã đăng nhập của sinh viên: icon chỉ xuất hiện ở logo thương hiệu, chuông thông báo, mũi tên avatar, cụm theme, thẻ hành trình và thanh tab dưới của điện thoại. Hàng menu điều hướng desktop (`.navbar__nav`) CHỈ GỒM CHỮ THUẦN TÚY, TUYỆT ĐỐI KHÔNG DÙNG ICON.
+- Nhóm 3 nút theme trên khung sinh viên hiển thị trực tiếp ở khu vực tác vụ trên thanh trên khi màn hình rộng (≥1024px); trên màn hình hẹp (<1024px), cụm theme được đưa vào bên trong dropdown menu avatar để tránh chật chội.
 
 ---
 
@@ -1179,8 +1209,8 @@ Nút chuyển `aria-busy="true"` và bị vô hiệu hóa khi đang submit. Hi�
 | Phông mặc định `system-ui` không lý do            | Phải dùng Be Vietnam Pro                               |
 | Văn mẫu "Chào mừng đến với tương lai…"            | Không phù hợp sản phẩm thực                            |
 | Số liệu thống kê giả                              | Không trung thực                                       |
-| Animation rườm rà: fade+slide trên mọi section    | Nhiễu, chậm                                            |
-| `border-radius: 20px+` cho mọi thứ                | Không phù hợp định hướng                               |
+| Animation rườm rà: fade+slide trên mọi section    | Nhiễu, chậm (Ngoại lệ duy nhất: vạch trượt mềm `.navbar__indicator` của rail menu sinh viên, có tôn trọng prefers-reduced-motion) |
+| `border-radius: 20px+` cho mọi thứ                | Không phù hợp định hướng (Ngoại lệ: dùng `--radius-full` cho thanh ray `.navbar__rail`, nút avatar pill và các pill badge) |
 | `th:utext` với dữ liệu người dùng nhập            | Lỗ hổng XSS                                            |
 | Dùng `hover` làm phản hồi duy nhất                | Điện thoại không có hover                              |
 
@@ -1251,14 +1281,13 @@ Fragment được dùng bằng `th:replace="~{fragments/badge-status :: badge(${
 
 ### Vị trí nút chọn
 
-**Khung STUDENT:**
-
-- Điện thoại: màn hình Hồ sơ, dưới thông tin cá nhân (xem mục 3a).
-- Máy tính (≥768px): thanh nav ngang, góc phải, dạng nhóm nút nhỏ.
+**Khung STUDENT:** Hiển thị trực tiếp ở khu vực tác vụ trên thanh trên (bên cạnh chuông thông báo) khi màn hình rộng (`≥1024px`). Trên màn hình hẹp (`<1024px`), cụm theme được ẩn khỏi thanh trên và đưa vào bên trong dropdown menu avatar dưới nhóm nhãn "Giao diện".
 
 **Khung MANAGER/ADMIN:** cuối sidebar, trên nút Đăng xuất.
 
-### Dạng nút — Nhóm 3 lựa chọn
+### Dạng nút — Nhóm 3 lựa chọn bằng Icon
+
+Nút chuyển chủ đề không hiển thị chữ, sử dụng 3 icon (mặt trời, mặt trăng, màn hình) có `aria-label`, `title`, và `aria-pressed`:
 
 ```html
 <div class="theme-switcher" role="group" aria-label="Chủ đề giao diện">
@@ -1266,22 +1295,28 @@ Fragment được dùng bằng `th:replace="~{fragments/badge-status :: badge(${
     class="theme-switcher__btn"
     data-theme-value="light"
     aria-pressed="true"
+    aria-label="Giao diện sáng"
+    title="Giao diện sáng"
   >
-    Sáng
+    <svg class="icon" aria-hidden="true"><use href="#icon-sun"/></svg>
   </button>
   <button
     class="theme-switcher__btn"
     data-theme-value="dark"
     aria-pressed="false"
+    aria-label="Giao diện tối"
+    title="Giao diện tối"
   >
-    Tối
+    <svg class="icon" aria-hidden="true"><use href="#icon-moon"/></svg>
   </button>
   <button
     class="theme-switcher__btn"
     data-theme-value="system"
     aria-pressed="false"
+    aria-label="Theo hệ thống"
+    title="Theo hệ thống"
   >
-    Hệ thống
+    <svg class="icon" aria-hidden="true"><use href="#icon-desktop"/></svg>
   </button>
 </div>
 ```
@@ -1289,15 +1324,23 @@ Fragment được dùng bằng `th:replace="~{fragments/badge-status :: badge(${
 ```css
 .theme-switcher {
   display: inline-flex;
-  border: var(--border-width) solid var(--border);
-  border-radius: var(--radius-md);
-  overflow: hidden;
+  align-items: center;
+  border: var(--border-width) solid var(--border-light);
+  border-radius: var(--radius-full);
+  padding: 3px;
+  gap: 2px;
+  background: var(--surface);
 }
 .theme-switcher__btn {
-  padding: var(--space-2) var(--space-4);
-  min-height: 44px;
-  font-size: var(--text-sm);
-  font-weight: var(--weight-medium);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  padding: 0;
+  border-radius: var(--radius-full);
   font-family: var(--font-sans);
   background: transparent;
   color: var(--text-muted);
@@ -1305,6 +1348,12 @@ Fragment được dùng bằng `th:replace="~{fragments/badge-status :: badge(${
   cursor: pointer;
   transition:
     background var(--duration-fast) var(--easing-std),
+    color var(--duration-fast) var(--easing-std);
+}
+.theme-switcher__btn svg {
+  width: 16px;
+  height: 16px;
+}
     color var(--duration-fast) var(--easing-std);
 }
 .theme-switcher__btn[aria-pressed="true"] {

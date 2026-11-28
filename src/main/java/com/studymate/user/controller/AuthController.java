@@ -7,6 +7,7 @@ import com.studymate.user.service.UserService;
 import com.studymate.user.service.UserService.EmailAlreadyExistsException;
 import com.studymate.user.service.UserService.PasswordMismatchException;
 import com.studymate.user.service.UserService.PasswordTooLongException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
@@ -26,12 +27,16 @@ public class AuthController {
     }
 
     @GetMapping("/login")
-    public String loginPage() {
+    public String loginPage(HttpServletRequest request) {
+        // Buoc tao session truoc khi Thymeleaf render form (tranh IllegalStateException CSRF)
+        request.getSession(true);
         return "auth/login";
     }
 
     @GetMapping("/register")
-    public String registerPage(Model model) {
+    public String registerPage(HttpServletRequest request, Model model) {
+        // Buoc tao session truoc khi Thymeleaf render form (tranh IllegalStateException CSRF)
+        request.getSession(true);
         model.addAttribute("registerRequest", new RegisterRequest());
         return "auth/register";
     }

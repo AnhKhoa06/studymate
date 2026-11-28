@@ -2,17 +2,65 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org" th:fragment="layout(title, content)">
 <head th:replace="~{layout/fragments/head :: head(${title})}"></head>
 <body class="layout-auth">
-    <header class="layout-auth__header">
-        <a th:href="@{/}" class="layout-auth__brand">StudyMate</a>
-        <div class="theme-switcher" role="group" aria-label="Chủ đề giao diện">
-            <button type="button" class="theme-switcher__btn" data-theme-value="light" aria-pressed="true">Sáng</button>
-            <button type="button" class="theme-switcher__btn" data-theme-value="dark" aria-pressed="false">Tối</button>
-            <button type="button" class="theme-switcher__btn" data-theme-value="system" aria-pressed="false">Hệ thống</button>
+    <div th:replace="~{fragments/icons :: svgSprite}"></div>
+
+    <!-- Trang loi (403, 404, 500): the giua trang, can giua -->
+    <th:block th:if="${#strings.contains(title, 'Không') or #strings.contains(title, 'Lỗi')}">
+        <header class="layout-auth__error-header">
+            <a th:href="@{/}" class="navbar__brand" aria-label="StudyMate Trang chủ">
+                <svg class="icon navbar__brand-icon" aria-hidden="true"><use href="#icon-brand"/></svg>
+                <span>StudyMate</span>
+            </a>
+            <div th:replace="~{fragments/theme-switcher :: themeSwitcher}"></div>
+        </header>
+        <main class="layout-auth__error-main">
+            <th:block th:replace="${content}"></th:block>
+        </main>
+        <footer th:replace="~{layout/fragments/footer :: footer}"></footer>
+    </th:block>
+
+    <!-- Trang Dang nhap / Dang ky: bo cuc 2 cot (70/30 hoac 65/35) -->
+    <th:block th:unless="${#strings.contains(title, 'Không') or #strings.contains(title, 'Lỗi')}">
+        <div class="auth-wrapper">
+            <!-- Cot trai (65% - 70%): anh khuon vien sac net tu nhien, khong phu nen xanh dam -->
+            <aside class="auth-hero">
+                <img th:src="@{/images/campus.jpg}" alt="Khuôn viên trường Đại học Quy Nhơn" class="auth-hero__img" width="1200" height="800" decoding="async">
+                <div class="auth-hero__scrim"></div>
+                <div class="auth-hero__content">
+                    <div class="auth-hero__brand">
+                        <svg class="icon auth-hero__brand-icon" aria-hidden="true"><use href="#icon-brand"/></svg>
+                        <span class="auth-hero__brand-text">StudyMate</span>
+                    </div>
+                    <p class="auth-hero__tagline">Nền tảng ghép nhóm học tập và đặt phòng học tự học</p>
+                </div>
+            </aside>
+
+            <!-- Cot phai (30% - 35%): theme switcher goc tren, logo truong phia tren, card form o giua -->
+            <main class="auth-main">
+                <div class="auth-main__top-bar">
+                    <div th:replace="~{fragments/theme-switcher :: themeSwitcher}"></div>
+                </div>
+
+                <div class="auth-main__center">
+                    <!-- Logo truong va tieu de nam o ngoai, phia tren the card theo mau -->
+                    <div class="auth-brand">
+                        <img th:src="@{/images/logo.png}" alt="Logo Trường Đại học Quy Nhơn" class="auth-brand__logo" width="96" height="96">
+                        <div class="auth-brand__meta">
+                            <h2 class="auth-brand__school">TRƯỜNG ĐẠI HỌC QUY NHƠN</h2>
+                            <p class="auth-brand__portal">CỔNG THÔNG TIN HỌC TẬP STUDYMATE</p>
+                        </div>
+                    </div>
+
+                    <!-- The form gon gang: dung div thay th:block de Thymeleaf replace dung -->
+                    <div class="auth-card-container" th:replace="${content}"></div>
+                </div>
+
+                <div class="auth-main__footer">
+                    <p>&copy; StudyMate &mdash; Đồ án môn PTPMHDT</p>
+                </div>
+            </main>
         </div>
-    </header>
-    <main class="layout-auth__main">
-        <th:block th:replace="${content}"></th:block>
-    </main>
-    <footer th:replace="~{layout/fragments/footer :: footer}"></footer>
+        <script th:src="@{/js/theme.js}"></script>
+    </th:block>
 </body>
 </html>

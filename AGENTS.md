@@ -39,6 +39,7 @@ Công nghệ: Java 21, Spring Boot 4.1.x, Maven, Spring MVC + Thymeleaf, Spring 
 ## Kiểm thử
 
 - Query tự viết: `@DataJpaTest`. Thuật toán: unit test. Phân quyền: MockMvc và Spring Security Test (chưa đăng nhập bị chặn, sai role bị từ chối, truy cập dữ liệu người khác bị từ chối).
+- Chỉ chạy `.\mvnw.cmd test` khi sửa phần backend hoặc dữ liệu (`controller`, `service`, `repository`, `entity`, `config`, `db/migration`, `pom.xml`); khi chỉ sửa giao diện/UI-UX (Thymeleaf HTML, CSS, JS tĩnh, tài liệu) thì không chạy `mvnw`.
 
 ## Git
 

@@ -45,6 +45,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 user.getFullName(),
                 user.getRole(),
                 user.isEnabled(),
+                !user.isTemporarilyLocked(),
                 authorities
         );
     }

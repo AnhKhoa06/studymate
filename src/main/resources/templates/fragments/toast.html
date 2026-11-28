@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="toastContainer" class="toast-container" id="toastContainer" aria-live="polite" aria-atomic="true">
+    <div th:if="${successMessage}" class="toast toast--success" data-toast="true" role="status">
+        <span class="toast__icon" aria-hidden="true">
+            <svg class="icon icon--sm"><use href="#icon-check"/></svg>
+        </span>
+        <div class="toast__content">
+            <p class="toast__message" th:text="${successMessage}"></p>
+        </div>
+        <button type="button" class="toast__close" aria-label="Đóng thông báo">
+            <svg class="icon icon--xs" aria-hidden="true"><use href="#icon-x"/></svg>
+        </button>
+    </div>
+
+    <div th:if="${errorMessage}" class="toast toast--error" data-toast="true" role="alert">
+        <span class="toast__icon" aria-hidden="true">
+            <svg class="icon icon--sm"><use href="#icon-warning"/></svg>
+        </span>
+        <div class="toast__content">
+            <p class="toast__message" th:text="${errorMessage}"></p>
+        </div>
+        <button type="button" class="toast__close" aria-label="Đóng thông báo">
+            <svg class="icon icon--xs" aria-hidden="true"><use href="#icon-x"/></svg>
+        </button>
+    </div>
+
+    <div th:if="${infoMessage}" class="toast toast--info" data-toast="true" role="status">
+        <span class="toast__icon" aria-hidden="true">
+            <svg class="icon icon--sm"><use href="#icon-bell"/></svg>
+        </span>
+        <div class="toast__content">
+            <p class="toast__message" th:text="${infoMessage}"></p>
+        </div>
+        <button type="button" class="toast__close" aria-label="Đóng thông báo">
+            <svg class="icon icon--xs" aria-hidden="true"><use href="#icon-x"/></svg>
+        </button>
+    </div>
+</div>
+</body>
+</html>

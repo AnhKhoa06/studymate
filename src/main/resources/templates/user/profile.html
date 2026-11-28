@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="${currentRole == 'MANAGER' or currentRole == 'ADMIN'} ? ~{layout/staff :: layout('Hồ sơ học tập', ~{::content})} : ~{layout/student :: layout('Hồ sơ học tập', ~{::content})}">
+<body>
+<div th:fragment="content">
+    <div class="profile-header">
+        <div>
+            <h1 class="page-title" style="margin-bottom: var(--space-1); border-bottom: none; padding-bottom: 0;">Hồ sơ học tập</h1>
+            <p class="profile-subtitle">Cập nhật thông tin khoa, lớp, môn đang học và khung giờ rảnh để hệ thống gợi ý bạn học phù hợp.</p>
+        </div>
+        <button type="submit" form="profileForm" class="btn btn--primary">Lưu hồ sơ</button>
+    </div>
+
+    <form th:action="@{/profile}" th:object="${profileForm}" method="post" class="profile-form" id="profileForm">
+        <div th:if="${#fields.hasGlobalErrors()}" class="alert alert--danger" role="alert">
+            <p th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
+        </div>
+
+        <div class="profile-grid">
+            <!-- Thong tin ca nhan & hoc tap -->
+            <section class="card profile-section">
+                <div class="profile-section__head">
+                    <h2 class="profile-section__title">Thông tin cơ bản</h2>
+                    <span class="badge badge--primary" th:text="${profile.email}"></span>
+                </div>
+
+                <div class="form-row-2">
+                    <div class="form-field">
+                        <label class="form-field__label" for="fullName">Họ và tên <span class="required">*</span></label>
+                        <input class="form-field__input" type="text" id="fullName" th:field="*{fullName}" maxlength="100" required>
+                        <p class="form-field__error" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"></p>
+                    </div>
+
+                    <div class="form-field">
+                        <label class="form-field__label" for="className">Lớp</label>
+                        <input class="form-field__input" type="text" id="className" th:field="*{className}" placeholder="Ví dụ: D22CQCN01" maxlength="50">
+                        <p class="form-field__error" th:if="${#fields.hasErrors('className')}" th:errors="*{className}"></p>
+                    </div>
+                </div>
+
+                <div class="form-row-2">
+                    <div class="form-field">
+                        <label class="form-field__label" for="faculty">Khoa / Ngành</label>
+                        <input class="form-field__input" type="text" id="faculty" th:field="*{faculty}" placeholder="Ví dụ: Công nghệ thông tin" maxlength="100">
+                        <p class="form-field__error" th:if="${#fields.hasErrors('faculty')}" th:errors="*{faculty}"></p>
+                    </div>
+
+                    <div class="form-field">
+                        <label class="form-field__label" for="academicLevel">Trình độ</label>
+                        <select class="form-field__input" id="academicLevel" th:field="*{academicLevel}">
+                            <option value="">-- Chọn trình độ --</option>
+                            <option th:each="lvl : ${academicLevels}" th:value="${lvl}" th:text="${lvl.label}"></option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-field">
+                    <label class="form-field__label" for="studyGoal">Mục tiêu học tập</label>
+                    <select class="form-field__input" id="studyGoal" th:field="*{studyGoal}">
+                        <option value="">-- Chọn mục tiêu --</option>
+                        <option th:each="goal : ${studyGoals}" th:value="${goal}" th:text="${goal.label}"></option>
+                    </select>
+                </div>
+
+                <div class="form-field">
+                    <label class="form-field__label" for="bio">Giới thiệu ngắn</label>
+                    <textarea class="form-field__input" id="bio" th:field="*{bio}" rows="3" maxlength="500"
+                              placeholder="Phong cách học, thời gian ưa thích hoặc lưu ý khi học nhóm..."></textarea>
+                    <p class="form-field__error" th:if="${#fields.hasErrors('bio')}" th:errors="*{bio}"></p>
+                </div>
+            </section>
+
+            <!-- Mon hoc & Gio ranh -->
+            <div class="profile-stack">
+                <section class="card profile-section">
+                    <div class="profile-section__head">
+                        <h2 class="profile-section__title">Môn đang học</h2>
+                        <button type="button" class="btn btn--secondary btn--sm" id="addSubjectBtn">+ Thêm môn</button>
+                    </div>
+
+                    <div id="subjectsContainer" class="repeater-list">
+                        <div class="repeater-row repeater-row--subject" th:each="sub, iter : *{subjects}">
+                            <input class="form-field__input" type="text"
+                                   th:name="|subjects[${iter.index}].subjectCode|"
+                                   th:value="${sub.subjectCode}"
+                                   placeholder="Mã môn (VD: INT1434)" maxlength="30">
+                            <input class="form-field__input" type="text"
+                                   th:name="|subjects[${iter.index}].subjectName|"
+                                   th:value="${sub.subjectName}"
+                                   placeholder="Tên môn học" maxlength="120">
+                            <button type="button" class="btn btn--secondary btn--sm btn-remove-row" aria-label="Xóa môn">Xóa</button>
+                        </div>
+                    </div>
+                    <p class="form-hint">Ví dụ: INT1434 - Phát triển phần mềm hướng đối tượng.</p>
+                </section>
+
+                <section class="card profile-section">
+                    <div class="profile-section__head">
+                        <h2 class="profile-section__title">Giờ rảnh theo tuần</h2>
+                        <button type="button" class="btn btn--secondary btn--sm" id="addSlotBtn">+ Thêm khung giờ</button>
+                    </div>
+
+                    <div id="slotsContainer" class="repeater-list">
+                        <div class="repeater-row repeater-row--slot" th:each="slot, iter : *{availabilitySlots}">
+                            <select class="form-field__input" th:name="|availabilitySlots[${iter.index}].dayOfWeek|">
+                                <option th:each="day : ${daysOfWeek}" th:value="${day.key}" th:text="${day.value}"
+                                        th:selected="${slot.dayOfWeek == day.key}"></option>
+                            </select>
+                            <input class="form-field__input" type="time"
+                                   th:name="|availabilitySlots[${iter.index}].startTime|"
+                                   th:value="${slot.startTime}">
+                            <input class="form-field__input" type="time"
+                                   th:name="|availabilitySlots[${iter.index}].endTime|"
+                                   th:value="${slot.endTime}">
+                            <button type="button" class="btn btn--secondary btn--sm btn-remove-row" aria-label="Xóa khung giờ">Xóa</button>
+                        </div>
+                    </div>
+                    <p class="form-hint">Chọn các khung giờ bạn thường rảnh để tính giờ rảnh chung khi ghép nhóm.</p>
+                </section>
+            </div>
+        </div>
+    </form>
+
+    <script>
+        (function () {
+            "use strict";
+            var subjectsContainer = document.getElementById("subjectsContainer");
+            var slotsContainer = document.getElementById("slotsContainer");
+            var addSubjectBtn = document.getElementById("addSubjectBtn");
+            var addSlotBtn = document.getElementById("addSlotBtn");
+
+            function reindex(container, prefix, fields) {
+                var rows = container.querySelectorAll(".repeater-row");
+                rows.forEach(function (row, idx) {
+                    fields.forEach(function (field, fIdx) {
+                        var input = row.querySelectorAll("input, select")[fIdx];
+                        if (input) {
+                            input.name = prefix + "[" + idx + "]." + field;
+                        }
+                    });
+                });
+            }
+
+            function bindRemove(container, prefix, fields) {
+                container.addEventListener("click", function (e) {
+                    var btn = e.target.closest(".btn-remove-row");
+                    if (!btn) return;
+                    var row = btn.closest(".repeater-row");
+                    if (row) {
+                        row.remove();
+                        reindex(container, prefix, fields);
+                    }
+                });
+            }
+
+            if (addSubjectBtn && subjectsContainer) {
+                bindRemove(subjectsContainer, "subjects", ["subjectCode", "subjectName"]);
+                addSubjectBtn.addEventListener("click", function () {
+                    var idx = subjectsContainer.querySelectorAll(".repeater-row").length;
+                    var row = document.createElement("div");
+                    row.className = "repeater-row repeater-row--subject";
+                    row.innerHTML =
+                        '<input class="form-field__input" type="text" name="subjects[' + idx + '].subjectCode" placeholder="Mã môn (VD: INT1434)" maxlength="30">' +
+                        '<input class="form-field__input" type="text" name="subjects[' + idx + '].subjectName" placeholder="Tên môn học" maxlength="120">' +
+                        '<button type="button" class="btn btn--secondary btn--sm btn-remove-row" aria-label="Xóa môn">Xóa</button>';
+                    subjectsContainer.appendChild(row);
+                });
+            }
+
+            if (addSlotBtn && slotsContainer) {
+                bindRemove(slotsContainer, "availabilitySlots", ["dayOfWeek", "startTime", "endTime"]);
+                addSlotBtn.addEventListener("click", function () {
+                    var idx = slotsContainer.querySelectorAll(".repeater-row").length;
+                    var row = document.createElement("div");
+                    row.className = "repeater-row repeater-row--slot";
+                    row.innerHTML =
+                        '<select class="form-field__input" name="availabilitySlots[' + idx + '].dayOfWeek">' +
+                        '<option value="1">Thứ 2</option>' +
+                        '<option value="2">Thứ 3</option>' +
+                        '<option value="3">Thứ 4</option>' +
+                        '<option value="4">Thứ 5</option>' +
+                        '<option value="5">Thứ 6</option>' +
+                        '<option value="6">Thứ 7</option>' +
+                        '<option value="7">Chủ nhật</option>' +
+                        '</select>' +
+                        '<input class="form-field__input" type="time" name="availabilitySlots[' + idx + '].startTime" value="08:00">' +
+                        '<input class="form-field__input" type="time" name="availabilitySlots[' + idx + '].endTime" value="10:00">' +
+                        '<button type="button" class="btn btn--secondary btn--sm btn-remove-row" aria-label="Xóa khung giờ">Xóa</button>';
+                    slotsContainer.appendChild(row);
+                });
+            }
+        })();
+    </script>
+</div>
+</body>
+</html>

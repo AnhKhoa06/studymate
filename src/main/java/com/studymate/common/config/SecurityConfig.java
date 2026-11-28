@@ -2,6 +2,7 @@ package com.studymate.common.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -27,8 +28,8 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/login", "/register", "/error",
-                                 "/css/**", "/js/**", "/images/**").permitAll()
+                .requestMatchers("/login", "/register", "/forgot-password", "/reset-password",
+                                 "/error", "/css/**", "/js/**", "/images/**").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/manager/**").hasRole("MANAGER")
                 .anyRequest().authenticated()
@@ -36,7 +37,13 @@ public class SecurityConfig {
             .formLogin(form -> form
                 .loginPage("/login")
                 .defaultSuccessUrl("/", true)
-                .failureUrl("/login?error")
+                .failureHandler((request, response, exception) -> {
+                    if (exception instanceof LockedException) {
+                        response.sendRedirect("/login?locked");
+                    } else {
+                        response.sendRedirect("/login?error");
+                    }
+                })
                 .permitAll()
             )
             .logout(logout -> logout

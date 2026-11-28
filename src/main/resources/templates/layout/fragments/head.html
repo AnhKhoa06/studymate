@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="color-scheme" content="light dark">
-    <meta name="theme-color" content="#EEF6F7">
+    <meta name="theme-color" content="#F8FAFC">
     <title th:text="${title != null ? title + ' - StudyMate' : 'StudyMate'}">StudyMate</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -34,7 +34,7 @@
             document.documentElement.setAttribute("data-theme", resolved);
             var meta = document.querySelector('meta[name="theme-color"]');
             if (meta) {
-                meta.setAttribute("content", resolved === "dark" ? "#0E1B20" : "#EEF6F7");
+                meta.setAttribute("content", resolved === "dark" ? "#0F172A" : "#F8FAFC");
             }
         })();
     </script>

@@ -23,7 +23,7 @@ Tên lớp trong tài liệu chỉ là gợi ý, không bắt buộc.
 | Migration Flyway       | `V<yyyyMMddHHmm>__mo_ta.sql`, mỗi người chỉ tạo bảng của module mình, không sửa file đã merge                                                                                                                                                    |
 | Tham chiếu giữa module | Dùng id (userId, groupId, roomId) thay cho quan hệ JPA chéo module; module chỉ gọi Service của module khác, không dùng Repository của module khác                                                                                                |
 | Role                   | `STUDENT`, `MANAGER`, `ADMIN`                                                                                                                                                                                                                    |
-| Đường dẫn              | user: `/login`, `/register`, `/profile`, `/admin/users`; matching: `/matching`; group: `/groups`; chat: `/chat`, `/notifications`, `/ws`; room: `/rooms`, `/bookings`, `/manager/rooms`; insight: `/insight`, `/manager/dashboard`, `/assistant` |
+| Đường dẫn              | user: `/login`, `/register`, `/profile`, `/admin/users`, `/assistant`; matching: `/matching`; group: `/groups`; chat: `/chat`, `/notifications`, `/ws`; room: `/rooms`, `/bookings`, `/manager/rooms`; insight: `/insight`, `/manager/dashboard` |
 | File dùng chung        | `pom.xml`, `SecurityConfig`, `application.properties`, layout chung: chỉ Khoa sửa, người khác cần gì thì nhờ Khoa hoặc tạo PR nhỏ riêng                                                                                                          |
 | Mỗi người              | Viết test cho module mình và phải giải thích được mọi dòng code trong module (kể cả code do AI sinh ra)                                                                                                                                          |
 
@@ -32,71 +32,72 @@ Tên lớp trong tài liệu chỉ là gợi ý, không bắt buộc.
 | Giai đoạn          | Mục tiêu                                                                                                                                                                        | Ai làm                           |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
 | 0. Nền tảng        | Khoa merge sớm nhất: User, Role, bảng users, SecurityConfig, layout chung, xử lý lỗi chung. Mọi người thiết lập máy, vẽ ERD và giao diện tĩnh cho module của mình trong lúc chờ | Khoa làm, 4 bạn còn lại chuẩn bị |
-| 1. Lõi từng module | Entity, migration, CRUD và logic chính của module. Huy merge bảng `study_groups` sớm vì Lịch cần                                                                                | Tất cả, song song                |
-| 2. Tích hợp        | Matching với nhóm, nhóm với đặt phòng, gợi ý phòng, gửi thông báo qua event                                                                                                     | Tất cả, phối hợp                 |
-| 3. Hoàn thiện      | Chat và thông báo realtime, chức năng nâng cao, rà soát bảo mật, tối ưu truy vấn, kiểm thử, báo cáo và demo                                                                     | Tất cả                           |
+| 1. Lõi và nâng cao từng module | Entity, migration, CRUD, logic chính và các chức năng nâng cao của từng module (làm song song luôn, không cần đợi xong hết mức cơ bản). Huy merge bảng `study_groups` sớm vì Lịch cần | Tất cả, song song                |
+| 2. Tích hợp                    | Matching với nhóm và AI giải thích, nhóm với AI tóm tắt chat, nhóm với đặt phòng, gợi ý phòng, gửi thông báo qua event                                                            | Tất cả, phối hợp                 |
+| 3. Hoàn thiện                  | Hoàn thiện chat và thông báo realtime, rà soát bảo mật, tối ưu truy vấn, kiểm thử, báo cáo và demo                                                                               | Tất cả                           |
 
 Các bạn khác chỉ cần clone và tạo nhánh từ `main` sau khi Khoa merge xong phần nền tảng của giai đoạn 0.
 
 ## 4. Phân công chi tiết
 
-### 4.1 Khoa: Nền tảng, Bảo mật, Tài khoản, Hồ sơ
+### 4.1 Khoa: Nền tảng, Bảo mật, Tài khoản, Hồ sơ và Trợ lý AI
 
-- **Sở hữu:** package `user`, `common`; bảng `users`, `student_profiles`, `profile_subjects`, `availability_slots`; các file dùng chung.
+- **Sở hữu:** package `user`, `common` (và phần Trợ lý AI `/assistant`); bảng `users`, `student_profiles`, `profile_subjects`, `availability_slots`, `ai_requests` (nếu cần); các file dùng chung.
 - **Giai đoạn 0 (làm đầu tiên):** entity `User` (email duy nhất, passwordHash, fullName, role, enabled), enum `Role`, migration tạo `users`, `SecurityConfig` (form login, BCrypt, mặc định chặn mọi request, chỉ mở trang đăng nhập, đăng ký và tài nguyên tĩnh), layout Thymeleaf chung với menu theo role, `@ControllerAdvice` xử lý lỗi, lớp tiện ích lấy người dùng hiện tại.
-- **Bắt buộc:** đăng ký, đăng nhập, đăng xuất có validation; hồ sơ học tập (khoa, lớp, trình độ, mục tiêu, môn đang học, giờ rảnh theo tuần); trang ADMIN quản lý tài khoản (phân trang, tìm kiếm, khóa hoặc mở khóa, đổi role); dữ liệu mẫu cho ADMIN, MANAGER và vài STUDENT (chỉ ở profile local).
-- **Nâng cao:** khóa tạm khi đăng nhập sai nhiều lần, nhật ký hoạt động, quên mật khẩu qua email.
-- **Hoàn thành khi:** chưa đăng nhập không vào được trang nào ngoài trang công khai; sai role bị 403; mật khẩu trong CSDL là chuỗi BCrypt; có test MockMvc cho phân quyền.
+- **Công việc chi tiết (làm luôn):**
+  - Tài khoản, hồ sơ và phân quyền: đăng ký, đăng nhập, đăng xuất có validation; hồ sơ học tập (khoa, lớp, trình độ, mục tiêu, môn đang học, giờ rảnh theo tuần); trang ADMIN quản lý tài khoản (phân trang, tìm kiếm, khóa hoặc mở khóa, đổi role); dữ liệu mẫu cho ADMIN, MANAGER và vài STUDENT (chỉ ở profile local).
+  - Bảo mật và quản trị mở rộng: khóa tạm khi đăng nhập sai nhiều lần, nhật ký hoạt động (ADMIN xem nhật ký hệ thống), quên mật khẩu qua email.
+  - Trợ lý AI (LLM - chuyển từ Khang sang Khoa): gọi API LLM để giải thích vì sao hai bạn hợp nhau (cung cấp service cho Khương) và tóm tắt chat nhóm thành checklist buổi học (cung cấp service cho Huy). API key để trong biến môi trường, có xử lý lỗi và hết thời gian chờ, có phương án dự phòng (fallback) khi API không dùng được, giới hạn tần suất gọi.
+- **Hoàn thành khi:** chưa đăng nhập không vào được trang nào ngoài trang công khai; sai role bị 403; mật khẩu trong CSDL là chuỗi BCrypt; có test MockMvc cho phân quyền; AI lỗi không làm hỏng trang.
 - **Câu hỏi thầy có thể hỏi:** vì sao dùng BCrypt thay vì MD5 hoặc SHA; CSRF và session hoạt động thế nào; khác nhau giữa phân quyền theo URL và `@PreAuthorize`.
 
 ### 4.2 Khương: Hồ sơ gợi ý và Matching
 
-- **Sở hữu:** package `matching`. Đọc dữ liệu hồ sơ từ module của Khoa qua Service.
-- **Bắt buộc:**
-  - Trang tìm bạn học có lọc theo môn và khoa, danh sách phân trang kèm match score.
+- **Sở hữu:** package `matching`; bảng `match_feedback`. Đọc dữ liệu hồ sơ từ module của Khoa qua Service.
+- **Công việc chi tiết (làm luôn):**
+  - Trang tìm bạn học có lọc theo môn và khoa, danh sách phân trang kèm match score (0-100).
   - Interface `MatchCriterion` (Strategy) cùng các lớp tiêu chí: môn học chung, giờ rảnh chung, mục tiêu, trình độ; `MatchService` cộng điểm có trọng số và trả `MatchResultDto` kèm chi tiết từng tiêu chí.
   - `CommonAvailabilityService`: nhận danh sách người dùng, trả các khung giờ chung dài nhất (dùng cho nhóm).
   - Dùng truy vấn JPA để lọc ứng viên trước rồi mới tính điểm, không tải cả bảng.
-- **Nâng cao:** bảng `match_feedback` để người dùng đánh giá độ phù hợp và điều chỉnh trọng số; phối hợp Khang để giải thích kết quả bằng ngôn ngữ tự nhiên.
+  - Phản hồi và giải thích AI: bảng `match_feedback` để người dùng đánh giá độ phù hợp và điều chỉnh trọng số; phối hợp Trợ lý AI của Khoa để giải thích vì sao hai bạn hợp nhau bằng ngôn ngữ tự nhiên.
 - **Hoàn thành khi:** thêm một tiêu chí mới chỉ cần thêm một lớp, không sửa `MatchService`; có unit test cho từng tiêu chí và tổng điểm; có `@DataJpaTest` cho truy vấn lọc.
-- **Phụ thuộc:** User và hồ sơ của Khoa. Trong lúc chờ, dùng dữ liệu mẫu.
+- **Phụ thuộc:** User, hồ sơ và dịch vụ Trợ lý AI của Khoa. Trong lúc chờ, dùng dữ liệu mẫu.
 
 ### 4.3 Huy: Nhóm học tập, Chat và Thông báo realtime
 
 - **Sở hữu:** package `group`, `chat`; bảng `study_groups`, `group_members`, `group_invitations`, `chat_messages`, `notifications`.
-- **Bắt buộc:**
+- **Công việc chi tiết (làm luôn):**
   - Tạo nhóm (tên, môn, sức chứa, mô tả), người tạo là trưởng nhóm. Merge bảng `study_groups` sớm.
   - Mời, chấp nhận, từ chối lời mời; rời nhóm; trưởng nhóm xóa thành viên; kiểm tra sức chứa và lời mời trùng.
-  - Chat nhóm realtime bằng Spring WebSocket (STOMP): chỉ thành viên nhóm gửi và nhận được, lưu lịch sử có phân trang.
+  - Chat nhóm realtime bằng Spring WebSocket (STOMP): chỉ thành viên nhóm gửi và nhận được, lưu lịch sử có phân trang, hiển thị trạng thái đang gõ.
+  - Tóm tắt chat nhóm thành checklist buổi học bằng Trợ lý AI (phối hợp với dịch vụ AI của Khoa).
   - Thông báo realtime và trang thông báo (đã đọc, chưa đọc). Định nghĩa các event (ví dụ `InvitationSentEvent`, `BookingApprovedEvent`) trong `common.event` ở PR đầu tiên để module khác phát event, Huy lắng nghe bằng `ApplicationEventPublisher` (Observer).
   - Bảo mật WebSocket: kênh chat yêu cầu đăng nhập, không đăng ký nghe được kênh của nhóm khác.
-- **Nâng cao:** hiển thị trạng thái đang gõ, tóm tắt chat bằng AI (phối hợp Khang).
 - **Hoàn thành khi:** người ngoài nhóm không đọc hay gửi được tin; mở lại trang vẫn thấy lịch sử chat; có test cho quy tắc nhóm.
-- **Phụ thuộc:** User của Khoa.
+- **Phụ thuộc:** User và dịch vụ Trợ lý AI của Khoa.
 
 ### 4.4 Lịch: Phòng học và Đặt phòng
 
-- **Sở hữu:** package `room`; bảng `rooms`, `bookings`.
-- **Bắt buộc:**
+- **Sở hữu:** package `room`; bảng `rooms`, `bookings` (và dữ liệu check-in, điểm uy tín liên quan).
+- **Công việc chi tiết (làm luôn):**
   - MANAGER quản lý phòng: mã, tòa, sức chứa, thiết bị, trạng thái, có tìm kiếm và phân trang.
   - Xem lịch trống theo ngày; trưởng nhóm đặt phòng cho nhóm; hủy đặt phòng.
   - Chống đặt trùng: truy vấn khoảng thời gian chồng lấn trong transaction, kết hợp `@Version` hoặc ràng buộc ở CSDL.
-  - Vòng đời đặt phòng bằng State pattern với tối thiểu các trạng thái PENDING, APPROVED, REJECTED, CANCELLED.
+  - Vòng đời đặt phòng bằng State pattern với đầy đủ các trạng thái `PENDING`, `APPROVED`, `CHECKED_IN`, `NO_SHOW`, `REJECTED`, `CANCELLED`.
   - MANAGER duyệt hoặc từ chối, và phát event để Huy gửi thông báo.
-- **Nâng cao:** check-in bằng mã QR, `@Scheduled` tự hủy sau 15 phút không đến, điểm uy tín, ghép nhiều nhóm nhỏ vào phòng lớn.
-- **Hoàn thành khi:** không đặt trùng được kể cả khi hai yêu cầu đến cùng lúc (có test); chuyển trạng thái sai (ví dụ đã hủy rồi duyệt) bị từ chối; người dùng chỉ hủy được đặt phòng của nhóm mình.
+  - Check-in QR, điểm uy tín và ghép phòng: check-in bằng mã QR, `@Scheduled` tự hủy đặt phòng sau 15 phút nếu không đến (`NO_SHOW`), giảm điểm uy tín khi vắng mặt; ghép nhiều nhóm nhỏ vào một phòng lớn khi nhiều nhóm có giờ trùng nhau để tối ưu việc dùng phòng.
+- **Hoàn thành khi:** không đặt trùng được kể cả khi hai yêu cầu đến cùng lúc (có test); chuyển trạng thái sai (ví dụ đã hủy rồi duyệt) bị từ chối; người dùng chỉ hủy được đặt phòng của nhóm mình; luồng check-in QR và tự hủy sau 15 phút hoạt động đúng.
 - **Phụ thuộc:** User của Khoa, `study_groups` của Huy.
 
-### 4.5 Khang: Gợi ý, Thống kê, Nhắc lịch và Trợ lý AI
+### 4.5 Khang: Gợi ý phòng, Thống kê và Nhắc lịch
 
-- **Sở hữu:** package `insight`; bảng `reminder_logs` (và `ai_requests` nếu cần).
-- **Bắt buộc:**
+- **Sở hữu:** package `insight`; bảng `reminder_logs`.
+- **Công việc chi tiết (làm luôn):**
   - Gợi ý phòng cho nhóm: nhận nhóm và ngày, lấy giờ chung từ Khương, sức chứa và thiết bị từ nhóm, danh sách phòng trống từ Lịch; trả top phòng phù hợp kèm lý do.
-  - Dashboard MANAGER: tỷ lệ lấp đầy phòng, giờ cao điểm, phòng ít dùng. Dùng truy vấn tổng hợp trả thẳng DTO, vẽ biểu đồ bằng Chart.js.
-  - Nhắc lịch qua email: `JavaMailSender` kết hợp `@Scheduled`, gửi trước giờ học và ghi log để không gửi trùng.
-- **Nâng cao:** Trợ lý AI gọi API LLM (giải thích vì sao hai bạn hợp nhau, tóm tắt chat thành checklist buổi học). API key để trong biến môi trường, có xử lý lỗi và hết thời gian chờ, có phương án dự phòng khi API không dùng được, giới hạn tần suất gọi.
-- **Hoàn thành khi:** dashboard không bị lỗi N+1 (kiểm tra bằng log SQL); gợi ý phòng có test; AI lỗi không làm hỏng trang.
-- **Phụ thuộc:** Khương (giờ chung), Lịch (phòng), Huy (nhóm). Giai đoạn đầu làm dashboard và email trên dữ liệu mẫu, tích hợp sau.
+  - Dashboard thống kê cho MANAGER: tỷ lệ lấp đầy phòng, giờ cao điểm, phòng ít dùng và phòng bị bỏ trống (`NO_SHOW`). Dùng truy vấn tổng hợp trả thẳng DTO, vẽ biểu đồ bằng Chart.js.
+  - Nhắc lịch và lịch tuần: nhắc buổi học và lịch đặt phòng qua email bằng `JavaMailSender` kết hợp `@Scheduled`, gửi trước giờ học và ghi `reminder_logs` để không gửi trùng; hiển thị lịch tuần.
+- **Hoàn thành khi:** dashboard không bị lỗi N+1 (kiểm tra bằng log SQL); gợi ý phòng có test; nhắc lịch không gửi trùng và hiển thị được lịch tuần.
+- **Phụ thuộc:** Khương (giờ chung), Lịch (phòng và đặt phòng), Huy (nhóm). Giai đoạn đầu làm dashboard và email trên dữ liệu mẫu, tích hợp sau.
 
 ## 5. Hợp đồng giữa các module
 
@@ -104,6 +105,8 @@ Các bạn khác chỉ cần clone và tạo nhánh từ `main` sau khi Khoa mer
 | ---------- | --------------------------------------- | ------------------------------------ |
 | Mọi module | Lớp tiện ích lấy người dùng hiện tại    | Khoa (`common`)                      |
 | Khương     | Dữ liệu hồ sơ: môn học, giờ rảnh        | Khoa (`ProfileService`)              |
+| Khương     | Dịch vụ AI giải thích match score       | Khoa (`AssistantService`)            |
+| Huy        | Dịch vụ AI tóm tắt chat thành checklist | Khoa (`AssistantService`)            |
 | Lịch       | Kiểm tra người dùng có phải trưởng nhóm | Huy (`GroupService`)                 |
 | Khang      | Giờ rảnh chung của nhóm                 | Khương (`CommonAvailabilityService`) |
 | Khang      | Danh sách phòng trống theo giờ          | Lịch (`RoomService`)                 |

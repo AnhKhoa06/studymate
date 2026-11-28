@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/staff :: layout('Quản lý tài khoản', ~{::content})}">
+<body>
+<div th:fragment="content">
+    <div class="admin-header">
+        <div>
+            <h2 class="admin-header__title">Danh sách tài khoản</h2>
+            <p class="admin-header__subtitle" th:text="|Tổng cộng ${usersPage.totalElements} tài khoản trong hệ thống|"></p>
+        </div>
+        <button type="button" class="btn btn--primary" id="openCreateUserModal">+ Tạo tài khoản</button>
+    </div>
+
+    <!-- Thanh tim kiem va loc -->
+    <form th:action="@{/admin/users}" method="get" class="card filter-bar">
+        <div class="filter-bar__fields">
+            <div class="form-field filter-bar__search">
+                <label class="form-field__label" for="searchKeyword">Tìm kiếm</label>
+                <input class="form-field__input" type="text" id="searchKeyword" name="q"
+                       th:value="${keyword}" placeholder="Nhập họ tên hoặc email...">
+            </div>
+
+            <div class="form-field">
+                <label class="form-field__label" for="filterRole">Vai trò</label>
+                <select class="form-field__input" id="filterRole" name="role">
+                    <option value="">Tất cả vai trò</option>
+                    <option th:each="r : ${roles}" th:value="${r.name()}"
+                            th:text="${r.name() == 'ADMIN' ? 'Quản trị viên' : (r.name() == 'MANAGER' ? 'Quản lý' : 'Sinh viên')}"
+                            th:selected="${selectedRole == r}"></option>
+                </select>
+            </div>
+
+            <div class="form-field">
+                <label class="form-field__label" for="filterEnabled">Trạng thái</label>
+                <select class="form-field__input" id="filterEnabled" name="enabled">
+                    <option value="">Tất cả</option>
+                    <option value="true" th:selected="${selectedEnabled != null and selectedEnabled}">Đang hoạt động</option>
+                    <option value="false" th:selected="${selectedEnabled != null and !selectedEnabled}">Đã khóa</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="filter-bar__actions">
+            <button type="submit" class="btn btn--primary btn--sm">Lọc</button>
+            <a th:href="@{/admin/users}" class="btn btn--secondary btn--sm">Đặt lại</a>
+        </div>
+    </form>
+
+    <!-- Bang danh sach tai khoan -->
+    <div class="card data-table-card">
+        <div class="data-table-wrap" th:if="${!usersPage.isEmpty()}">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Người dùng</th>
+                        <th>Vai trò</th>
+                        <th>Trạng thái</th>
+                        <th>Ngày tạo</th>
+                        <th class="data-table__col-actions">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="u : ${usersPage.content}">
+                        <td>
+                            <div class="table-user">
+                                <span class="avatar avatar--sm" aria-hidden="true"
+                                      th:text="${#strings.toUpperCase(#strings.substring(u.fullName, 0, 1))}">U</span>
+                                <div class="table-user__meta">
+                                    <span class="table-user__name" th:text="${u.fullName}"></span>
+                                    <span class="table-user__email" th:text="${u.email}"></span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge"
+                                  th:classappend="${u.role.name() == 'ADMIN' ? ' badge--accent' : ' badge--primary'}"
+                                  th:text="${u.role.name() == 'ADMIN' ? 'Quản trị viên' : (u.role.name() == 'MANAGER' ? 'Quản lý' : 'Sinh viên')}"></span>
+                        </td>
+                        <td>
+                            <span class="status-pill"
+                                  th:classappend="${u.enabled ? ' status-pill--active' : ' status-pill--locked'}"
+                                  th:text="${u.enabled ? 'Hoạt động' : 'Đã khóa'}"></span>
+                        </td>
+                        <td class="text-muted" th:text="${#temporals.format(u.createdAt, 'dd/MM/yyyy')}"></td>
+                        <td class="data-table__col-actions">
+                            <span th:if="${u.id == currentAdminId}" class="badge badge--sm badge--primary">Đang đăng nhập</span>
+                            <div th:if="${u.id != currentAdminId}" class="table-actions">
+                                <form th:action="@{/admin/users/{id}/role(id=${u.id})}" method="post" class="inline-form">
+                                    <input type="hidden" name="q" th:value="${keyword}">
+                                    <input type="hidden" name="role" th:value="${selectedRole != null ? selectedRole.name() : ''}">
+                                    <input type="hidden" name="enabled" th:value="${selectedEnabled != null ? selectedEnabled : ''}">
+                                    <input type="hidden" name="page" th:value="${usersPage.number}">
+                                    <select class="form-field__input form-field__input--compact" name="newRole" aria-label="Chọn vai trò mới">
+                                        <option th:each="r : ${roles}" th:value="${r.name()}"
+                                                th:text="${r.name() == 'ADMIN' ? 'Quản trị viên' : (r.name() == 'MANAGER' ? 'Quản lý' : 'Sinh viên')}"
+                                                th:selected="${u.role == r}"></option>
+                                    </select>
+                                    <button type="submit" class="btn btn--secondary btn--sm">Đổi vai trò</button>
+                                </form>
+
+                                <form th:action="@{/admin/users/{id}/toggle-status(id=${u.id})}" method="post" class="inline-form">
+                                    <input type="hidden" name="q" th:value="${keyword}">
+                                    <input type="hidden" name="role" th:value="${selectedRole != null ? selectedRole.name() : ''}">
+                                    <input type="hidden" name="enabled" th:value="${selectedEnabled != null ? selectedEnabled : ''}">
+                                    <input type="hidden" name="page" th:value="${usersPage.number}">
+                                    <button type="submit" class="btn btn--sm"
+                                            th:classappend="${u.enabled ? ' btn--danger-outline' : ' btn--primary'}"
+                                            th:text="${u.enabled ? 'Khóa' : 'Mở khóa'}"></button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="empty-state" th:if="${usersPage.isEmpty()}">
+            <svg class="icon empty-state__icon" aria-hidden="true"><use href="#icon-users"/></svg>
+            <p class="empty-state__title">Không tìm thấy tài khoản nào</p>
+            <p class="empty-state__desc">Thử thay đổi từ khóa tìm kiếm hoặc bộ lọc vai trò, trạng thái.</p>
+        </div>
+
+        <!-- Phan trang -->
+        <div class="pagination" th:if="${usersPage.totalPages > 1}">
+            <a class="btn btn--secondary btn--sm"
+               th:if="${usersPage.hasPrevious()}"
+               th:href="@{/admin/users(q=${keyword}, role=${selectedRole}, enabled=${selectedEnabled}, page=${usersPage.number - 1})}">Trước</a>
+            <span class="pagination__info" th:text="|Trang ${usersPage.number + 1} / ${usersPage.totalPages}|"></span>
+            <a class="btn btn--secondary btn--sm"
+               th:if="${usersPage.hasNext()}"
+               th:href="@{/admin/users(q=${keyword}, role=${selectedRole}, enabled=${selectedEnabled}, page=${usersPage.number + 1})}">Sau</a>
+        </div>
+    </div>
+
+    <!-- Modal tao tai khoan moi (Manager / Student / Admin) -->
+    <div class="modal-backdrop" id="createUserModal" hidden role="dialog" aria-modal="true" aria-labelledby="createUserModalTitle">
+        <div class="modal-card card">
+            <div class="modal-card__head">
+                <h3 class="modal-card__title" id="createUserModalTitle">Tạo tài khoản mới</h3>
+                <button type="button" class="toast__close" id="closeCreateUserModal" aria-label="Đóng">
+                    <svg class="icon icon--xs" aria-hidden="true"><use href="#icon-x"/></svg>
+                </button>
+            </div>
+
+            <form th:action="@{/admin/users/create}" th:object="${createUserForm}" method="post" class="modal-card__form">
+                <div class="form-field">
+                    <label class="form-field__label" for="createFullName">Họ và tên <span class="required">*</span></label>
+                    <input class="form-field__input" type="text" id="createFullName" th:field="*{fullName}" required maxlength="100" placeholder="Nguyễn Văn A">
+                </div>
+
+                <div class="form-field">
+                    <label class="form-field__label" for="createEmail">Email <span class="required">*</span></label>
+                    <input class="form-field__input" type="email" id="createEmail" th:field="*{email}" required maxlength="255" placeholder="manager@studymate.edu.vn">
+                </div>
+
+                <div class="form-field">
+                    <label class="form-field__label" for="createPassword">Mật khẩu tạm <span class="required">*</span></label>
+                    <input class="form-field__input" type="password" id="createPassword" th:field="*{password}" required minlength="8" placeholder="Tối thiểu 8 ký tự">
+                </div>
+
+                <div class="form-field">
+                    <label class="form-field__label" for="createRole">Vai trò</label>
+                    <select class="form-field__input" id="createRole" th:field="*{role}">
+                        <option th:each="r : ${roles}" th:value="${r.name()}"
+                                th:text="${r.name() == 'ADMIN' ? 'Quản trị viên' : (r.name() == 'MANAGER' ? 'Quản lý' : 'Sinh viên')}"></option>
+                    </select>
+                </div>
+
+                <div class="modal-card__actions">
+                    <button type="button" class="btn btn--secondary" id="cancelCreateUserModal">Hủy</button>
+                    <button type="submit" class="btn btn--primary">Tạo tài khoản</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            "use strict";
+            var modal = document.getElementById("createUserModal");
+            var openBtn = document.getElementById("openCreateUserModal");
+            var closeBtn = document.getElementById("closeCreateUserModal");
+            var cancelBtn = document.getElementById("cancelCreateUserModal");
+
+            if (!modal || !openBtn) return;
+
+            function openModal() {
+                modal.removeAttribute("hidden");
+            }
+            function closeModal() {
+                modal.setAttribute("hidden", "");
+            }
+
+            openBtn.addEventListener("click", openModal);
+            if (closeBtn) closeBtn.addEventListener("click", closeModal);
+            if (cancelBtn) cancelBtn.addEventListener("click", closeModal);
+            modal.addEventListener("click", function (e) {
+                if (e.target === modal) closeModal();
+            });
+        })();
+    </script>
+</div>
+</body>
+</html>
