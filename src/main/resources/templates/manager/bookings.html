@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/staff :: layout('Duyệt đặt phòng', ~{::content})}">
+<body>
+<div th:fragment="content">
+    <div class="admin-header">
+        <div>
+            <h2 class="admin-header__title">Danh sách yêu cầu đặt phòng</h2>
+            <p class="admin-header__subtitle" th:text="|Tổng cộng ${bookingsPage.totalElements} yêu cầu|"></p>
+        </div>
+        <a th:href="@{/rooms}" class="btn btn--secondary">Xem lịch phòng theo ngày</a>
+    </div>
+
+    <form th:action="@{/manager/bookings}" method="get" class="card filter-bar">
+        <div class="filter-bar__fields">
+            <div class="form-field filter-bar__search">
+                <label class="form-field__label" for="searchKeyword">Tìm kiếm</label>
+                <input class="form-field__input" type="text" id="searchKeyword" name="q"
+                       th:value="${keyword}" placeholder="Mã phòng, tòa nhà hoặc mục đích...">
+            </div>
+
+            <div class="form-field">
+                <label class="form-field__label" for="filterStatus">Trạng thái</label>
+                <select class="form-field__input" id="filterStatus" name="status">
+                    <option value="" th:selected="${selectedStatus == null}">Tất cả</option>
+                    <option th:each="s : ${statuses}" th:value="${s.name()}" th:text="${s.displayName}"
+                            th:selected="${selectedStatus == s}"></option>
+                </select>
+            </div>
+        </div>
+
+        <div class="filter-bar__actions">
+            <button type="submit" class="btn btn--primary btn--sm">Lọc</button>
+            <a th:href="@{/manager/bookings(status='')}" class="btn btn--secondary btn--sm">Xem tất cả</a>
+        </div>
+    </form>
+
+    <div class="card data-table-card">
+        <div class="data-table-wrap" th:if="${!bookingsPage.isEmpty()}">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Phòng</th>
+                        <th>Nhóm / Người đặt</th>
+                        <th>Khung giờ</th>
+                        <th>Mục đích</th>
+                        <th>Trạng thái</th>
+                        <th class="data-table__col-actions">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="b : ${bookingsPage.content}">
+                        <td th:text="|${b.roomCode} (${b.roomBuilding})|"></td>
+                        <td th:text="|Nhóm #${b.groupId} (User #${b.requestedByUserId})|"></td>
+                        <td th:text="|${#temporals.format(b.startTime, 'dd/MM/yyyy HH:mm')} - ${#temporals.format(b.endTime, 'HH:mm')}|"></td>
+                        <td th:text="${#strings.isEmpty(b.purpose) ? 'Không có' : b.purpose}"></td>
+                        <td>
+                            <span class="status-pill" th:text="${b.status.displayName}"></span>
+                            <div class="text-muted" th:if="${!#strings.isEmpty(b.rejectionReason)}"
+                                 th:text="|Lý do: ${b.rejectionReason}|"></div>
+                        </td>
+                        <td class="data-table__col-actions">
+                            <div th:if="${b.status.name() == 'PENDING'}" class="table-actions">
+                                <form th:action="@{/manager/bookings/{id}/approve(id=${b.id})}" method="post" class="inline-form">
+                                    <input type="hidden" name="q" th:value="${keyword}">
+                                    <input type="hidden" name="status" th:value="${selectedStatus != null ? selectedStatus.name() : ''}">
+                                    <input type="hidden" name="page" th:value="${bookingsPage.number}">
+                                    <button type="submit" class="btn btn--primary btn--sm">Duyệt</button>
+                                </form>
+
+                                <form th:action="@{/manager/bookings/{id}/reject(id=${b.id})}" method="post" class="inline-form">
+                                    <input type="hidden" name="q" th:value="${keyword}">
+                                    <input type="hidden" name="status" th:value="${selectedStatus != null ? selectedStatus.name() : ''}">
+                                    <input type="hidden" name="page" th:value="${bookingsPage.number}">
+                                    <input class="form-field__input form-field__input--compact" type="text" name="reason"
+                                           required maxlength="255" placeholder="Lý do từ chối..." aria-label="Lý do từ chối">
+                                    <button type="submit" class="btn btn--danger-outline btn--sm">Từ chối</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="empty-state" th:if="${bookingsPage.isEmpty()}">
+            <p class="empty-state__title">Không có yêu cầu đặt phòng phù hợp</p>
+        </div>
+
+        <div class="pagination" th:if="${bookingsPage.totalPages > 1}">
+            <a class="btn btn--secondary btn--sm"
+               th:if="${bookingsPage.hasPrevious()}"
+               th:href="@{/manager/bookings(q=${keyword}, status=${selectedStatus != null ? selectedStatus.name() : ''}, page=${bookingsPage.number - 1})}">Trước</a>
+            <span class="pagination__info" th:text="|Trang ${bookingsPage.number + 1} / ${bookingsPage.totalPages}|"></span>
+            <a class="btn btn--secondary btn--sm"
+               th:if="${bookingsPage.hasNext()}"
+               th:href="@{/manager/bookings(q=${keyword}, status=${selectedStatus != null ? selectedStatus.name() : ''}, page=${bookingsPage.number + 1})}">Sau</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

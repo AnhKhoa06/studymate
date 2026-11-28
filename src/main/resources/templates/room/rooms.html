@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="${currentRole == 'MANAGER' or currentRole == 'ADMIN'} ? ~{layout/staff :: layout('Lịch phòng trống theo ngày', ~{::content})} : ~{layout/student :: layout('Lịch phòng trống theo ngày', ~{::content})}">
+<body>
+<div th:fragment="content">
+    <div class="admin-header">
+        <div>
+            <h1 class="page-title" style="margin-bottom: var(--space-1); border-bottom: none; padding-bottom: 0;">Lịch phòng trống theo ngày</h1>
+            <p class="admin-header__subtitle" th:text="|Ngày ${#temporals.format(selectedDate, 'dd/MM/yyyy')} — ${roomsPage.totalElements} phòng sẵn sàng|"></p>
+        </div>
+        <a th:if="${currentRole == 'STUDENT'}" th:href="@{/bookings}" class="btn btn--primary">Đặt phòng của tôi</a>
+    </div>
+
+    <form th:action="@{/rooms}" method="get" class="card filter-bar">
+        <div class="filter-bar__fields">
+            <div class="form-field">
+                <label class="form-field__label" for="scheduleDate">Ngày xem</label>
+                <input class="form-field__input" type="date" id="scheduleDate" name="date"
+                       th:value="${#temporals.format(selectedDate, 'yyyy-MM-dd')}">
+            </div>
+
+            <div class="form-field filter-bar__search">
+                <label class="form-field__label" for="searchKeyword">Tìm kiếm</label>
+                <input class="form-field__input" type="text" id="searchKeyword" name="q"
+                       th:value="${keyword}" placeholder="Mã phòng, tòa nhà hoặc thiết bị...">
+            </div>
+
+            <div class="form-field">
+                <label class="form-field__label" for="filterBuilding">Tòa nhà</label>
+                <select class="form-field__input" id="filterBuilding" name="building">
+                    <option value="">Tất cả tòa</option>
+                    <option th:each="b : ${buildings}" th:value="${b}" th:text="${b}"
+                            th:selected="${selectedBuilding == b}"></option>
+                </select>
+            </div>
+
+            <div class="form-field">
+                <label class="form-field__label" for="minCapacity">Sức chứa tối thiểu</label>
+                <input class="form-field__input" type="number" id="minCapacity" name="minCapacity"
+                       min="1" max="500" th:value="${minCapacity}" placeholder="VD: 8">
+            </div>
+        </div>
+
+        <div class="filter-bar__actions">
+            <button type="submit" class="btn btn--primary btn--sm">Xem lịch</button>
+            <a th:href="@{/rooms}" class="btn btn--secondary btn--sm">Hôm nay</a>
+        </div>
+    </form>
+
+    <div class="card data-table-card">
+        <div class="data-table-wrap" th:if="${!roomsPage.isEmpty()}">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Phòng</th>
+                        <th>Sức chứa</th>
+                        <th>Thiết bị</th>
+                        <th>Khung giờ đã đặt trong ngày</th>
+                        <th th:if="${currentRole == 'STUDENT'}" class="data-table__col-actions">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="room : ${roomsPage.content}">
+                        <td>
+                            <strong th:text="${room.code}"></strong>
+                            <span class="text-muted" th:text="| (${room.building})|"></span>
+                        </td>
+                        <td th:text="|${room.capacity} chỗ|"></td>
+                        <td th:text="${#strings.isEmpty(room.equipment) ? 'Không có' : room.equipment}"></td>
+                        <td>
+                            <span class="status-pill status-pill--active"
+                                  th:if="${#lists.isEmpty(schedulesByRoomId[room.id])}">Trống cả ngày</span>
+                            <div th:if="${!#lists.isEmpty(schedulesByRoomId[room.id])}">
+                                <div th:each="slot : ${schedulesByRoomId[room.id]}">
+                                    <span th:text="|${#temporals.format(slot.startTime, 'HH:mm')} - ${#temporals.format(slot.endTime, 'HH:mm')} (${slot.status.displayName})|"></span>
+                                </div>
+                            </div>
+                        </td>
+                        <td th:if="${currentRole == 'STUDENT'}" class="data-table__col-actions">
+                            <a th:href="@{/bookings(roomId=${room.id}, date=${#temporals.format(selectedDate, 'yyyy-MM-dd')})}"
+                               class="btn btn--primary btn--sm">Đặt phòng</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="empty-state" th:if="${roomsPage.isEmpty()}">
+            <p class="empty-state__title">Không có phòng sẵn sàng phù hợp</p>
+            <p class="empty-state__desc">Thử đổi bộ lọc tòa nhà hoặc sức chứa tối thiểu.</p>
+        </div>
+
+        <div class="pagination" th:if="${roomsPage.totalPages > 1}">
+            <a class="btn btn--secondary btn--sm"
+               th:if="${roomsPage.hasPrevious()}"
+               th:href="@{/rooms(date=${#temporals.format(selectedDate, 'yyyy-MM-dd')}, q=${keyword}, building=${selectedBuilding}, minCapacity=${minCapacity}, page=${roomsPage.number - 1})}">Trước</a>
+            <span class="pagination__info" th:text="|Trang ${roomsPage.number + 1} / ${roomsPage.totalPages}|"></span>
+            <a class="btn btn--secondary btn--sm"
+               th:if="${roomsPage.hasNext()}"
+               th:href="@{/rooms(date=${#temporals.format(selectedDate, 'yyyy-MM-dd')}, q=${keyword}, building=${selectedBuilding}, minCapacity=${minCapacity}, page=${roomsPage.number + 1})}">Sau</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

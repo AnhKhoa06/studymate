@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/student :: layout('Đặt phòng học', ~{::content})}">
+<body>
+<div th:fragment="content">
+    <div class="admin-header">
+        <div>
+            <h1 class="page-title" style="margin-bottom: var(--space-1); border-bottom: none; padding-bottom: 0;">Đặt phòng học cho nhóm</h1>
+            <p class="admin-header__subtitle">Trưởng nhóm chọn phòng trống và khung giờ phù hợp để gửi yêu cầu đặt phòng.</p>
+        </div>
+        <a th:href="@{/rooms}" class="btn btn--secondary">Xem lịch phòng trống</a>
+    </div>
+
+    <!-- Form gui yeu cau dat phong -->
+    <section class="card">
+        <h2 class="profile-section__title">Tạo yêu cầu đặt phòng mới</h2>
+        <form th:action="@{/bookings}" th:object="${bookingForm}" method="post" class="modal-card__form">
+            <div th:if="${#fields.hasGlobalErrors()}" class="alert alert--danger" role="alert">
+                <p th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
+            </div>
+
+            <div class="form-row-2">
+                <div class="form-field">
+                    <label class="form-field__label" for="bookingRoomId">Phòng học <span class="required">*</span></label>
+                    <select class="form-field__input" id="bookingRoomId" th:field="*{roomId}" required>
+                        <option value="">-- Chọn phòng --</option>
+                        <option th:each="room : ${availableRooms}" th:value="${room.id}"
+                                th:text="|${room.code} (${room.building} - ${room.capacity} chỗ)|"></option>
+                    </select>
+                    <p class="form-field__error" th:if="${#fields.hasErrors('roomId')}" th:errors="*{roomId}"></p>
+                </div>
+
+                <div class="form-field">
+                    <label class="form-field__label" for="bookingGroupId">Mã nhóm học <span class="required">*</span></label>
+                    <input class="form-field__input" type="number" id="bookingGroupId" th:field="*{groupId}"
+                           required min="1" placeholder="Nhập ID nhóm học của bạn">
+                    <p class="form-field__error" th:if="${#fields.hasErrors('groupId')}" th:errors="*{groupId}"></p>
+                </div>
+            </div>
+
+            <div class="form-row-2">
+                <div class="form-field">
+                    <label class="form-field__label" for="bookingStartTime">Thời gian bắt đầu <span class="required">*</span></label>
+                    <input class="form-field__input" type="datetime-local" id="bookingStartTime"
+                           name="startTime"
+                           th:value="${bookingForm.startTime != null ? #temporals.format(bookingForm.startTime, 'yyyy-MM-dd''T''HH:mm') : ''}"
+                           required>
+                    <p class="form-field__error" th:if="${#fields.hasErrors('startTime')}" th:errors="*{startTime}"></p>
+                </div>
+
+                <div class="form-field">
+                    <label class="form-field__label" for="bookingEndTime">Thời gian kết thúc <span class="required">*</span></label>
+                    <input class="form-field__input" type="datetime-local" id="bookingEndTime"
+                           name="endTime"
+                           th:value="${bookingForm.endTime != null ? #temporals.format(bookingForm.endTime, 'yyyy-MM-dd''T''HH:mm') : ''}"
+                           required>
+                    <p class="form-field__error" th:if="${#fields.hasErrors('endTime')}" th:errors="*{endTime}"></p>
+                </div>
+            </div>
+
+            <div class="form-field">
+                <label class="form-field__label" for="bookingPurpose">Mục đích buổi học</label>
+                <input class="form-field__input" type="text" id="bookingPurpose" th:field="*{purpose}"
+                       maxlength="255" placeholder="Ôn tập OOP, thảo luận đồ án...">
+                <p class="form-field__error" th:if="${#fields.hasErrors('purpose')}" th:errors="*{purpose}"></p>
+            </div>
+
+            <div class="modal-card__actions">
+                <button type="submit" class="btn btn--primary">Gửi yêu cầu đặt phòng</button>
+            </div>
+        </form>
+    </section>
+
+    <!-- Danh sach yeu cau dat phong cua sinh vien -->
+    <section class="card data-table-card">
+        <div class="admin-header">
+            <h2 class="profile-section__title">Lịch đặt phòng của bạn</h2>
+            <form th:action="@{/bookings}" method="get" class="inline-form">
+                <select class="form-field__input form-field__input--compact" name="status" aria-label="Lọc trạng thái">
+                    <option value="">Tất cả trạng thái</option>
+                    <option th:each="s : ${statuses}" th:value="${s.name()}" th:text="${s.displayName}"
+                            th:selected="${selectedStatus == s}"></option>
+                </select>
+                <button type="submit" class="btn btn--secondary btn--sm">Lọc</button>
+            </form>
+        </div>
+
+        <div class="data-table-wrap" th:if="${!bookingsPage.isEmpty()}">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Phòng</th>
+                        <th>Nhóm</th>
+                        <th>Khung giờ</th>
+                        <th>Mục đích</th>
+                        <th>Trạng thái</th>
+                        <th>Ghi chú</th>
+                        <th class="data-table__col-actions">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="b : ${bookingsPage.content}">
+                        <td th:text="|${b.roomCode} (${b.roomBuilding})|"></td>
+                        <td th:text="|Nhóm #${b.groupId}|"></td>
+                        <td th:text="|${#temporals.format(b.startTime, 'dd/MM/yyyy HH:mm')} - ${#temporals.format(b.endTime, 'HH:mm')}|"></td>
+                        <td th:text="${#strings.isEmpty(b.purpose) ? 'Không có' : b.purpose}"></td>
+                        <td>
+                            <span class="status-pill" th:text="${b.status.displayName}"></span>
+                        </td>
+                        <td th:text="${!#strings.isEmpty(b.rejectionReason) ? b.rejectionReason : ''}"></td>
+                        <td class="data-table__col-actions">
+                            <form th:if="${b.status.name() == 'PENDING' or b.status.name() == 'APPROVED'}"
+                                  th:action="@{/bookings/{id}/cancel(id=${b.id})}" method="post" class="inline-form">
+                                <input type="hidden" name="status" th:value="${selectedStatus != null ? selectedStatus.name() : ''}">
+                                <input type="hidden" name="page" th:value="${bookingsPage.number}">
+                                <button type="submit" class="btn btn--danger-outline btn--sm">Hủy</button>
+                            </form>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="empty-state" th:if="${bookingsPage.isEmpty()}">
+            <p class="empty-state__title">Bạn chưa có yêu cầu đặt phòng nào</p>
+        </div>
+
+        <div class="pagination" th:if="${bookingsPage.totalPages > 1}">
+            <a class="btn btn--secondary btn--sm"
+               th:if="${bookingsPage.hasPrevious()}"
+               th:href="@{/bookings(status=${selectedStatus}, page=${bookingsPage.number - 1})}">Trước</a>
+            <span class="pagination__info" th:text="|Trang ${bookingsPage.number + 1} / ${bookingsPage.totalPages}|"></span>
+            <a class="btn btn--secondary btn--sm"
+               th:if="${bookingsPage.hasNext()}"
+               th:href="@{/bookings(status=${selectedStatus}, page=${bookingsPage.number + 1})}">Sau</a>
+        </div>
+    </section>
+</div>
+</body>
+</html>
